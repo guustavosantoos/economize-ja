@@ -77,10 +77,6 @@ npx prisma migrate dev --name init
 npx prisma db seed
 ```
 
-**Usuário de teste criado pelo seed:**
-- Email: `teste@economizeja.com`
-- Senha: `Test@1234`
-
 ### 5. Inicie os serviços
 
 **Opção A — Tudo junto:**
