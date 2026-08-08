@@ -14,7 +14,7 @@ RUN npm ci
 COPY apps/api ./apps/api
 COPY packages ./packages
 
-RUN npx prisma generate --schema=apps/api/prisma/schema.prisma
+RUN ./apps/api/node_modules/.bin/prisma generate --schema=apps/api/prisma/schema.prisma
 RUN npm run build --workspace=apps/api
 
 FROM node:20-alpine AS runner
