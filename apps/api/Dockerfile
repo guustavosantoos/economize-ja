@@ -2,6 +2,9 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Instalar dependências nativas para compilar o argon2 no Alpine Linux
+RUN apk add --no-cache python3 make g++
+
 COPY package*.json ./
 COPY apps/api/package*.json ./apps/api/
 COPY apps/api/prisma ./apps/api/prisma
