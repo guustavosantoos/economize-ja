@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>Onboarding - Economize Já</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary-fixed": "#002020",
+                      "tertiary-container": "#8f0012",
+                      "on-background": "#191c1d",
+                      "error-container": "#ffdad6",
+                      "on-error-container": "#93000a",
+                      "on-tertiary-fixed-variant": "#930013",
+                      "secondary": "#006c49",
+                      "on-error": "#ffffff",
+                      "surface-bright": "#f8f9fa",
+                      "surface-tint": "#2e6767",
+                      "error": "#ba1a1a",
+                      "surface-dim": "#d9dadb",
+                      "primary-fixed-dim": "#98d1d0",
+                      "primary-container": "#0d4d4d",
+                      "inverse-primary": "#98d1d0",
+                      "surface-container-highest": "#e1e3e4",
+                      "tertiary-fixed": "#ffdad7",
+                      "on-secondary-fixed": "#002113",
+                      "tertiary": "#65000a",
+                      "tertiary-fixed-dim": "#ffb3ad",
+                      "on-secondary": "#ffffff",
+                      "primary": "#003535",
+                      "on-tertiary": "#ffffff",
+                      "surface-container-low": "#f3f4f5",
+                      "primary-fixed": "#b4edec",
+                      "surface-container": "#edeeef",
+                      "inverse-on-surface": "#f0f1f2",
+                      "on-secondary-fixed-variant": "#005236",
+                      "outline": "#707978",
+                      "secondary-container": "#6cf8bb",
+                      "surface": "#f8f9fa",
+                      "surface-container-lowest": "#ffffff",
+                      "secondary-fixed-dim": "#4edea3",
+                      "on-primary": "#ffffff",
+                      "inverse-surface": "#2e3132",
+                      "on-surface": "#191c1d",
+                      "on-secondary-container": "#00714d",
+                      "surface-container-high": "#e7e8e9",
+                      "on-tertiary-fixed": "#410004",
+                      "secondary-fixed": "#6ffbbe",
+                      "background": "#f8f9fa",
+                      "on-primary-container": "#85bdbc",
+                      "outline-variant": "#bfc8c8",
+                      "on-surface-variant": "#404848",
+                      "surface-variant": "#e1e3e4",
+                      "on-primary-fixed-variant": "#104f4f",
+                      "on-tertiary-container": "#ff958e"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-mobile": "20px",
+                      "gutter": "16px",
+                      "stack-sm": "8px",
+                      "stack-lg": "24px",
+                      "base": "4px",
+                      "stack-md": "16px"
+              },
+              "fontFamily": {
+                      "body-lg": [
+                              "Inter", "sans-serif"
+                      ],
+                      "body-md": [
+                              "Inter", "sans-serif"
+                      ],
+                      "label-md": [
+                              "Inter", "sans-serif"
+                      ],
+                      "numeric-lg": [
+                              "Inter", "sans-serif"
+                      ],
+                      "display": [
+                              "Inter", "sans-serif"
+                      ],
+                      "headline-lg": [
+                              "Inter", "sans-serif"
+                      ],
+                      "headline-md": [
+                              "Inter", "sans-serif"
+                      ]
+              },
+              "fontSize": {
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-md": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "numeric-lg": [
+                              "28px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.03em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "display": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-md": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .snap-mandatory {
+            scroll-snap-type: x mandatory;
+        }
+        .snap-start {
+            scroll-snap-align: start;
+        }
+        
+        .carousel-indicator {
+            transition: all 0.3s ease;
+        }
+        .carousel-indicator.active {
+            width: 24px;
+            background-color: theme('colors.primary');
+        }
+      </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md h-screen w-full overflow-hidden flex flex-col justify-between selection:bg-primary-container selection:text-on-primary-container">
+<!-- Content Area (Carousel) -->
+<main class="flex-grow flex flex-col relative w-full h-full max-w-[500px] mx-auto bg-surface-container-lowest sm:shadow-lg sm:rounded-lg overflow-hidden">
+<div class="flex w-full h-full overflow-x-auto snap-mandatory no-scrollbar smooth-scroll" id="carousel">
+<!-- Slide 1 -->
+<section class="min-w-full h-full flex flex-col items-center justify-center p-margin-mobile pt-stack-lg snap-start shrink-0" id="slide-1">
+<div class="w-full flex-grow flex items-center justify-center mb-stack-lg">
+<img alt="Welcome Illustration" class="w-[280px] h-[280px] object-contain drop-shadow-xl" data-alt="A modern, abstract 3D illustration representing personal finance management. A calm composition featuring floating geometric shapes resembling coins, a soft glowing wallet, and a rising graph line in a bright, clean environment. The color palette focuses on soft whites, muted grays, and deep teal accents to evoke trust and stability." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTEXcO4m3BsLe1XRcBzAUe167jB1AobhCx3D6NXfuj10liQbmIQxFb7FA-BG-hJLYEoEWYB40pivNZXVlpgxHoI7ZlQjuO4Q-FBvw-ID61UC1AFcfTEl7LRPafY6Xj-2OMmWiWzZh0c4QTZ8eRFWYv0WmfJT8H_b_ZnsqTve1owlUZQV1xiafCK0PWSGupSgaHvjtxqyKuCE0-r3MDE9DrP12own_biIOO17w3uG_eAQMdroSC77w7"/>
+</div>
+<div class="w-full text-center mb-stack-lg px-4">
+<h1 class="font-display text-display text-primary mb-stack-sm">Welcome to Economize Já</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Your journey to financial clarity and control starts here.</p>
+</div>
+</section>
+<!-- Slide 2 -->
+<section class="min-w-full h-full flex flex-col items-center justify-center p-margin-mobile pt-stack-lg snap-start shrink-0" id="slide-2">
+<div class="w-full flex-grow flex items-center justify-center mb-stack-lg">
+<img alt="Control Expenses Illustration" class="w-[280px] h-[280px] object-contain drop-shadow-xl" data-alt="A sleek, soft-minimalist 3D illustration showing a stylized dashboard interface floating in mid-air. The interface features clean pie charts and simple bar graphs in deep teal and success green against a pristine white background. The lighting is soft and diffused, creating a professional, calming atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuALcGLAVBBt8aNqM0Wdwaz_tKSyfick_79hRDrj88W6cxzjiNiO5eCgCS4-klZJHIvEmfsLxmUTyLZjuOTD9Bj8yRRSOW49LPr5fHGqTCCGLj-SRLTmO-EDp6-PZ08xtpChHBDLYe8RDLp3y6S-GnAtMFEqsTXUlyNjE9Q4NtmBDOosRmO9WugNmC0mWCycn0Dqoyxt1-egJnjGW15eYoNcFxJWMcrYY7i2BFdnnsS6Dm-GQPqoiwxT"/>
+</div>
+<div class="w-full text-center mb-stack-lg px-4">
+<h2 class="font-headline-lg text-headline-lg text-primary mb-stack-sm">Control your expenses with ease</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Track every cent visually and intuitively to stay on top of your budget.</p>
+</div>
+</section>
+<!-- Slide 3 -->
+<section class="min-w-full h-full flex flex-col items-center justify-center p-margin-mobile pt-stack-lg snap-start shrink-0" id="slide-3">
+<div class="w-full flex-grow flex items-center justify-center mb-stack-lg relative">
+<img alt="Telegram Integration Illustration" class="w-[280px] h-[280px] object-contain drop-shadow-xl" data-alt="A modern, friendly 3D illustration depicting a stylized paper airplane or messaging icon seamlessly integrating with a glowing financial ledger. The scene uses soft lighting, pristine white surfaces, and deep teal accents to represent secure, effortless communication and data logging. The mood is efficient and trustworthy." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmnsJnINyidSpH6On63kD3u34GNgLk-c6CPAVdu1b9LLwB5B12LaFcGJI71mUSqwqWDx11ypsRcRGpPo2pDY85he6mAor4Cikr7v9uMoPORCj3Kfc52iPW4_Kbu4VriYIfD6UsdBDXE6NGaEDhSPWVgZUJ6xpVBsyjY7HHyUlk1u2ADOYhnKmAl8OEl-0fliG6VDPbLzcUHpu-iwOUXGxqmCiD2rUVJVW6RiuRrVA5RkSqEdnX0lea"/>
+</div>
+<div class="w-full text-center mb-stack-lg px-4">
+<h2 class="font-headline-lg text-headline-lg text-primary mb-stack-sm">Integrate with Telegram</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Log your expenses quickly on the go using our smart Telegram bot.</p>
+</div>
+</section>
+</div>
+<!-- Controls Area -->
+<div class="w-full p-margin-mobile pb-[max(20px,env(safe-area-inset-bottom))] bg-surface-container-lowest flex flex-col items-center gap-stack-lg">
+<!-- Indicators -->
+<div class="flex gap-2 items-center" id="indicators">
+<div class="h-2 w-2 rounded-full bg-outline-variant carousel-indicator active cursor-pointer" onclick="scrollToSlide(0)"></div>
+<div class="h-2 w-2 rounded-full bg-outline-variant carousel-indicator cursor-pointer" onclick="scrollToSlide(1)"></div>
+<div class="h-2 w-2 rounded-full bg-outline-variant carousel-indicator cursor-pointer" onclick="scrollToSlide(2)"></div>
+</div>
+<!-- Buttons -->
+<div class="w-full flex justify-between items-center h-12">
+<button class="font-label-md text-label-md text-on-surface-variant px-4 py-2 rounded-full hover:bg-surface-container-low transition-colors duration-200" id="skipBtn">
+                    Skip
+                </button>
+<button class="bg-primary text-on-primary font-label-md text-label-md px-6 h-full rounded-full flex items-center gap-2 hover:opacity-90 active:scale-95 transition-all duration-200 shadow-md" id="nextBtn">
+                    Next
+                    <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</main>
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const carousel = document.getElementById('carousel');
+            const indicators = document.querySelectorAll('.carousel-indicator');
+            const nextBtn = document.getElementById('nextBtn');
+            const skipBtn = document.getElementById('skipBtn');
+            const totalSlides = 3;
+            let currentSlide = 0;
+
+            // Update indicators based on scroll position
+            carousel.addEventListener('scroll', () => {
+                const scrollLeft = carousel.scrollLeft;
+                const slideWidth = carousel.clientWidth;
+                currentSlide = Math.round(scrollLeft / slideWidth);
+                updateUI();
+            });
+
+            function updateUI() {
+                // Update indicators
+                indicators.forEach((indicator, index) => {
+                    if (index === currentSlide) {
+                        indicator.classList.add('active');
+                        indicator.classList.remove('bg-outline-variant');
+                    } else {
+                        indicator.classList.remove('active');
+                        indicator.classList.add('bg-outline-variant');
+                    }
+                });
+
+                // Update button text on last slide
+                if (currentSlide === totalSlides - 1) {
+                    nextBtn.innerHTML = `Get Started <span class="material-symbols-outlined text-[18px]">check</span>`;
+                    skipBtn.style.opacity = '0';
+                    skipBtn.style.pointerEvents = 'none';
+                } else {
+                    nextBtn.innerHTML = `Next <span class="material-symbols-outlined text-[18px]">arrow_forward</span>`;
+                    skipBtn.style.opacity = '1';
+                    skipBtn.style.pointerEvents = 'auto';
+                }
+            }
+
+            // Next button click handler
+            nextBtn.addEventListener('click', () => {
+                if (currentSlide < totalSlides - 1) {
+                    scrollToSlide(currentSlide + 1);
+                } else {
+                    // Navigate to next screen (Dashboard)
+                    console.log('Navigate to Dashboard');
+                    // window.location.href = '/dashboard'; 
+                }
+            });
+
+            // Skip button click handler
+            skipBtn.addEventListener('click', () => {
+                scrollToSlide(totalSlides - 1);
+            });
+
+            // Make scrollToSlide globally available for indicator clicks
+            window.scrollToSlide = (index) => {
+                const slideWidth = carousel.clientWidth;
+                carousel.scrollTo({
+                    left: index * slideWidth,
+                    behavior: 'smooth'
+                });
+            };
+        });
+    </script>
+</body></html>
