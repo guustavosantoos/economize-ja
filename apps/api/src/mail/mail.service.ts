@@ -25,7 +25,7 @@ export class MailService {
       return;
     }
 
-    const fromAddress = this.configService.get('MAIL_FROM') || 'Economize Já <onboarding@resend.dev>';
+    const fromAddress = this.configService.get('MAIL_FROM') || 'Economize Já <noreply@economizeja.com.br>';
 
     try {
       await this.resend.emails.send({
@@ -35,7 +35,17 @@ export class MailService {
         html,
       });
     } catch (e) {
-      console.error('Falha ao enviar e-mail via Resend:', e);
+      console.warn('Tentando fallback via onboarding@resend.dev...', e);
+      try {
+        await this.resend.emails.send({
+          from: 'Economize Já <onboarding@resend.dev>',
+          to,
+          subject,
+          html,
+        });
+      } catch (err) {
+        console.error('Falha ao enviar e-mail via Resend:', err);
+      }
     }
   }
 }
