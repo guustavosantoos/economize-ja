@@ -1,50 +1,70 @@
 import { Injectable } from '@nestjs/common';
-import { Resend } from 'resend';
 import { ConfigService } from '@nestjs/config';
+import { Resend } from 'resend';
+import axios from 'axios';
 
 @Injectable()
 export class MailService {
-  private resend: Resend;
-  
+  private resend?: Resend;
+
   constructor(private configService: ConfigService) {
-    this.resend = new Resend(this.configService.get('RESEND_API_KEY') || 'mock');
+    const resendKey = this.configService.get('RESEND_API_KEY');
+    if (resendKey && resendKey !== 'mock' && resendKey !== 'change-me') {
+      this.resend = new Resend(resendKey);
+    }
   }
 
   async sendEmail(to: string, subject: string, html: string) {
     if (this.configService.get('NODE_ENV') === 'test') return;
-    
-    // Log do e-mail no console (útil para ver o código de 6 dígitos nos logs do Railway)
+
     console.log(`\n================ E-MAIL DISPARADO ================`);
     console.log(`Para: ${to}`);
     console.log(`Assunto: ${subject}`);
-    console.log(`Conteúdo:\n${html}`);
     console.log(`==================================================\n`);
 
-    const apiKey = this.configService.get('RESEND_API_KEY');
-    if (!apiKey || apiKey === 'mock' || apiKey === 'change-me') {
-      return;
+    const brevoApiKey = this.configService.get('BREVO_API_KEY');
+    const senderEmail = this.configService.get('MAIL_FROM_EMAIL') || 'guuh.santos153@gmail.com';
+    const senderName = this.configService.get('MAIL_FROM_NAME') || 'Economize Já';
+
+    // 1. Brevo REST API (Suporta envio gratuito para qualquer e-mail sem precisar de domínio pago)
+    if (brevoApiKey) {
+      try {
+        await axios.post(
+          'https://api.brevo.com/v3/smtp/email',
+          {
+            sender: { name: senderName, email: senderEmail },
+            to: [{ email: to }],
+            subject,
+            htmlContent: html.replace(/\n/g, '<br/>'),
+          },
+          {
+            headers: {
+              'api-key': brevoApiKey,
+              'Content-Type': 'application/json',
+              Accept: 'application/json',
+            },
+          }
+        );
+        console.log(`[Brevo] E-mail enviado com sucesso para ${to}!`);
+        return;
+      } catch (err: any) {
+        console.error('[Brevo Error]:', err?.response?.data || err.message);
+      }
     }
 
-    const fromAddress = this.configService.get('MAIL_FROM') || 'Economize Já <noreply@economizeja.com.br>';
-
-    try {
-      await this.resend.emails.send({
-        from: fromAddress,
-        to,
-        subject,
-        html,
-      });
-    } catch (e) {
-      console.warn('Tentando fallback via onboarding@resend.dev...', e);
+    // 2. Resend API
+    if (this.resend) {
+      const fromAddress = this.configService.get('MAIL_FROM') || 'Economize Já <onboarding@resend.dev>';
       try {
         await this.resend.emails.send({
-          from: 'Economize Já <onboarding@resend.dev>',
+          from: fromAddress,
           to,
           subject,
           html,
         });
-      } catch (err) {
-        console.error('Falha ao enviar e-mail via Resend:', err);
+        console.log(`[Resend] E-mail enviado para ${to}!`);
+      } catch (e) {
+        console.error('Falha ao enviar e-mail via Resend:', e);
       }
     }
   }
