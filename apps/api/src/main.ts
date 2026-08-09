@@ -27,10 +27,16 @@ async function bootstrap() {
   );
 
   // Restrição explícita de CORS para origens permitidas
+  const frontendUrls = (process.env.FRONTEND_URL || '')
+    .split(',')
+    .map((u) => u.trim())
+    .filter(Boolean);
+
   const allowedOrigins = [
-    process.env.FRONTEND_URL || 'http://localhost:3000',
+    ...frontendUrls,
     'http://localhost:3000',
     'http://127.0.0.1:3000',
+    'https://economize-ja-production.up.railway.app',
   ];
 
   app.enableCors({
