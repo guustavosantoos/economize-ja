@@ -48,7 +48,15 @@ async function handleLinking(ctx: Context, rawCode: string) {
       '💡 *Dica:* Digite `/` para ver todas as opções (ex: `/resumo`, `/limite`, `/zerar`).',
     ].join('\n'), { parse_mode: 'Markdown' });
   } catch (error: any) {
-    const msg = error?.response?.data?.message || 'Código inválido ou expirado. Gere um novo código no app em Perfil → Telegram.';
+    console.error('[Bot Link Error]:', error?.response?.status, error?.response?.data || error?.message);
+    let msg = error?.response?.data?.message;
+    if (!msg) {
+      if (error?.code === 'ECONNREFUSED' || error?.message?.includes('Network') || error?.message?.includes('connect')) {
+        msg = 'Falha de comunicação entre o Bot e a API. Verifique a URL da API.';
+      } else {
+        msg = error?.message || 'Código inválido ou expirado. Gere um novo código no app.';
+      }
+    }
     const displayMsg = Array.isArray(msg) ? msg.join(', ') : msg;
     return ctx.reply(`❌ ${displayMsg}`);
   }

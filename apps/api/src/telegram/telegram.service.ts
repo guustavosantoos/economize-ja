@@ -41,9 +41,18 @@ export class TelegramService {
 
   async linkAccount(code: string, chatId: number) {
     const cleanCode = code ? code.trim().toUpperCase() : '';
+    console.log(`[Telegram Link] Tentativa de vínculo com código '${cleanCode}' para chatId ${chatId}`);
+
     const link = await this.prisma.telegramLink.findFirst({ where: { linkCode: cleanCode } });
-    if (!link || !link.linkCodeExpiresAt || link.linkCodeExpiresAt < new Date()) {
-      throw new BadRequestException('Código inválido ou expirado. Gere um novo código no app.');
+
+    if (!link) {
+      console.warn(`[Telegram Link Error] Código '${cleanCode}' não encontrado no banco.`);
+      throw new BadRequestException('Código de vínculo não encontrado. Verifique se digitou corretamente ou gere um novo no app.');
+    }
+
+    if (!link.linkCodeExpiresAt || link.linkCodeExpiresAt < new Date()) {
+      console.warn(`[Telegram Link Error] Código '${cleanCode}' expirou em ${link.linkCodeExpiresAt}. Data atual: ${new Date()}`);
+      throw new BadRequestException('Este código já expirou (válido por 10 min). Gere um novo no app em Perfil → Telegram.');
     }
 
     await this.prisma.telegramLink.update({
@@ -56,6 +65,7 @@ export class TelegramService {
       },
     });
 
+    console.log(`[Telegram Link Success] Conta do usuário ${link.userId} vinculada com sucesso ao chatId ${chatId}!`);
     await this.audit.log(link.userId, 'telegram_link', {}, { chatId });
     return { success: true, userId: link.userId };
   }
