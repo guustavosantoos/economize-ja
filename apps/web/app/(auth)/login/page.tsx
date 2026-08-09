@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../stores/auth.store';
 import { useThemeStore } from '../../../stores/theme.store';
@@ -10,19 +10,34 @@ import GoogleAuthButton from '../../../components/GoogleAuthButton';
 export default function Login() {
   const router = useRouter();
   const loginAction = useAuthStore((s) => s.loginAction);
+  const storeError = useAuthStore((s) => s.error);
   const { theme, toggleTheme } = useThemeStore();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedEmail = localStorage.getItem('rememberedEmail');
+      const savedRememberMe = localStorage.getItem('rememberMe');
+      if (savedEmail) {
+        setEmail(savedEmail);
+      }
+      if (savedRememberMe !== null) {
+        setRememberMe(savedRememberMe === 'true');
+      }
+    }
+  }, []);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     try {
-      await loginAction(email, password);
+      await loginAction(email, password, rememberMe);
       router.push('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Email ou senha incorretos');
@@ -30,6 +45,8 @@ export default function Login() {
       setLoading(false);
     }
   };
+
+  const displayError = error || storeError;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background text-on-background px-4 py-8 relative transition-colors duration-200">
@@ -64,12 +81,12 @@ export default function Login() {
           <p className="text-xs text-outline mt-1 font-medium">Entre na sua conta para continuar</p>
         </div>
 
-        {error && (
+        {displayError && (
           <div
             data-cy="login-error-message"
             className="bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs px-4 py-3 rounded-xl mb-4 font-bold border border-rose-500/20"
           >
-            {error}
+            {displayError}
           </div>
         )}
 
@@ -105,6 +122,20 @@ export default function Login() {
             required
             autoComplete="current-password"
           />
+
+          {/* Checkbox Manter-me Conectado */}
+          <div className="flex items-center justify-between px-1 py-1">
+            <label className="flex items-center gap-2.5 text-xs font-bold text-on-surface cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 rounded border-surface-variant dark:border-[#1f2937] accent-primary cursor-pointer"
+              />
+              <span>Manter-me conectado (2 dias)</span>
+            </label>
+          </div>
+
           <button
             data-cy="login-submit-button"
             type="submit"

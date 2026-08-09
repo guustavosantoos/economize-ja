@@ -6,7 +6,7 @@ type AuthState = {
   user: User | null;
   isLoading: boolean;
   error: string | null;
-  loginAction: (e: string, p: string) => Promise<void>;
+  loginAction: (e: string, p: string, rememberMe?: boolean) => Promise<void>;
   registerAction: (n: string, e: string, p: string) => Promise<void>;
   googleLoginAction: (googleData: { email: string; name?: string; googleId?: string; credential?: string }) => Promise<void>;
   logoutAction: () => void;
@@ -18,13 +18,21 @@ export const useAuthStore = create<AuthState>((set) => ({
   isLoading: false,
   error: null,
 
-  loginAction: async (email, password) => {
+  loginAction: async (email, password, rememberMe = true) => {
     set({ isLoading: true, error: null });
     try {
       const res = await apiClient.post('/auth/login', { email, password });
       const token = res?.accessToken || res?.data?.accessToken;
       if (token) {
         localStorage.setItem('accessToken', token);
+        localStorage.setItem('loginTimestamp', String(Date.now()));
+        if (rememberMe) {
+          localStorage.setItem('rememberMe', 'true');
+          localStorage.setItem('rememberedEmail', email.trim());
+        } else {
+          localStorage.removeItem('rememberMe');
+          localStorage.removeItem('rememberedEmail');
+        }
       }
       const user = await apiClient.get('/users/me');
       set({ user, isLoading: false });
@@ -52,6 +60,11 @@ export const useAuthStore = create<AuthState>((set) => ({
       const token = res?.accessToken || res?.data?.accessToken;
       if (token) {
         localStorage.setItem('accessToken', token);
+        localStorage.setItem('loginTimestamp', String(Date.now()));
+        localStorage.setItem('rememberMe', 'true');
+        if (googleData.email) {
+          localStorage.setItem('rememberedEmail', googleData.email);
+        }
       }
       const user = await apiClient.get('/users/me');
       set({ user, isLoading: false });
@@ -63,6 +76,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logoutAction: () => {
     localStorage.removeItem('accessToken');
+    localStorage.removeItem('loginTimestamp');
     set({ user: null });
     if (typeof window !== 'undefined') window.location.href = '/login';
   },
@@ -71,6 +85,21 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (typeof window === 'undefined') return;
     const token = localStorage.getItem('accessToken');
     if (!token || token === 'undefined' || token === 'null') return;
+
+    const loginTimestamp = localStorage.getItem('loginTimestamp');
+    const isRemembered = localStorage.getItem('rememberMe') === 'true';
+
+    // 48 horas (2 dias) se "Manter conectado", ou 24 horas (1 dia) se desmarcado
+    const maxAgeMs = isRemembered ? 2 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000;
+
+    if (loginTimestamp && Date.now() - Number(loginTimestamp) > maxAgeMs) {
+      console.log('Sessão expirada após o limite de tempo.');
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('loginTimestamp');
+      set({ user: null, isLoading: false, error: 'Sua sessão expirou por segurança (2 dias). Faça login novamente.' });
+      return;
+    }
+
     set({ isLoading: true });
     try {
       const user = await apiClient.get('/users/me');
@@ -78,6 +107,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     } catch {
       set({ user: null, isLoading: false });
       localStorage.removeItem('accessToken');
+      localStorage.removeItem('loginTimestamp');
     }
   },
 }));
