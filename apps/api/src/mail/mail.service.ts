@@ -12,15 +12,28 @@ export class MailService {
 
   async sendEmail(to: string, subject: string, html: string) {
     if (this.configService.get('NODE_ENV') === 'test') return;
+    
+    // Log do e-mail no console (útil para ver o código de 6 dígitos nos logs do Railway)
+    console.log(`\n================ E-MAIL DISPARADO ================`);
+    console.log(`Para: ${to}`);
+    console.log(`Assunto: ${subject}`);
+    console.log(`Conteúdo:\n${html}`);
+    console.log(`==================================================\n`);
+
+    const apiKey = this.configService.get('RESEND_API_KEY');
+    if (!apiKey || apiKey === 'mock' || apiKey === 'change-me') {
+      return;
+    }
+
     try {
-       await this.resend.emails.send({
+      await this.resend.emails.send({
         from: 'Economize Já <noreply@economizeja.com>',
         to,
         subject,
         html,
       });
-    } catch(e) {
-        console.error('Email failed', e);
+    } catch (e) {
+      console.error('Falha ao enviar e-mail via Resend:', e);
     }
   }
 }
