@@ -25,9 +25,11 @@ export class MailService {
       return;
     }
 
+    const fromAddress = this.configService.get('MAIL_FROM') || 'Economize Já <onboarding@resend.dev>';
+
     try {
       await this.resend.emails.send({
-        from: 'Economize Já <noreply@economizeja.com>',
+        from: fromAddress,
         to,
         subject,
         html,
