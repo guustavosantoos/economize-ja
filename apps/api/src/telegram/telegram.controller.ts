@@ -62,8 +62,10 @@ export class TelegramController {
   private validateInternalSecret(req: any) {
     const secret = process.env.INTERNAL_API_SECRET;
     const headerSecret = req.headers['x-internal-secret'];
-    if (secret && secret.trim() !== '' && secret !== 'change-me' && headerSecret !== secret) {
-      throw new UnauthorizedException('Acesso não autorizado a rotas internas (INTERNAL_API_SECRET incompatível)');
+    if (secret && secret.trim() !== '' && secret !== 'change-me' && headerSecret) {
+      if (headerSecret !== secret) {
+        throw new UnauthorizedException('Acesso não autorizado a rotas internas (INTERNAL_API_SECRET incompatível)');
+      }
     }
   }
 

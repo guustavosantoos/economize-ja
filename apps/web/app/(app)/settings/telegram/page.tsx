@@ -137,13 +137,13 @@ export default function TelegramLink() {
 
           <div className="pt-2 flex flex-col gap-3">
             <a
-              href="https://t.me/EconomizeJaBot"
+              href="https://t.me/meu_economizeJa_bot"
               target="_blank"
               rel="noopener noreferrer"
               className="w-full bg-[#0088cc] hover:bg-[#0077b3] text-white p-4 rounded-xl font-bold shadow-md flex items-center justify-center gap-2 transition-all active:scale-95"
             >
               <span className="material-symbols-outlined text-xl">send</span>
-              Abrir Bot no Telegram
+              Abrir Bot no Telegram (@meu_economizeJa_bot)
             </a>
 
             <button
@@ -168,7 +168,7 @@ export default function TelegramLink() {
               <li className="flex items-start gap-2.5">
                 <span className="w-5 h-5 rounded-full bg-primary text-on-primary text-xs flex items-center justify-center font-bold flex-shrink-0 mt-0.5">1</span>
                 <div>
-                  Clique no botão abaixo ou busque por <strong className="text-primary">@EconomizeJaBot</strong> no Telegram.
+                  Clique no botão abaixo ou busque por <strong className="text-primary">@meu_economizeJa_bot</strong> no Telegram.
                 </div>
               </li>
               <li className="flex items-start gap-2.5">
@@ -186,13 +186,13 @@ export default function TelegramLink() {
             </ol>
 
             <a
-              href="https://t.me/EconomizeJaBot"
+              href="https://t.me/meu_economizeJa_bot"
               target="_blank"
               rel="noopener noreferrer"
               className="w-full bg-[#0088cc] hover:bg-[#0077b3] text-white py-3 px-4 rounded-xl font-bold text-sm shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 mt-2"
             >
               <span className="material-symbols-outlined text-lg">open_in_new</span>
-              Abrir Bot no Telegram (@EconomizeJaBot)
+              Abrir Bot no Telegram (@meu_economizeJa_bot)
             </a>
           </div>
 
