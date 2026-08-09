@@ -23,7 +23,7 @@ export class MailService {
     console.log(`==================================================\n`);
 
     const brevoApiKey = this.configService.get('BREVO_API_KEY');
-    const senderEmail = this.configService.get('MAIL_FROM_EMAIL') || 'guuh.santos153@gmail.com';
+    const senderEmail = this.configService.get('MAIL_FROM_EMAIL') || 'onboarding.economizeja@gmail.com';
     const senderName = this.configService.get('MAIL_FROM_NAME') || 'Economize Já';
 
     const formattedHtml = html.includes('<html') || html.includes('<div')
