@@ -96,7 +96,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       console.log('Sessão expirada após o limite de tempo.');
       localStorage.removeItem('accessToken');
       localStorage.removeItem('loginTimestamp');
-      set({ user: null, isLoading: false, error: 'Sua sessão expirou por segurança (2 dias). Faça login novamente.' });
+      set({ user: null, isLoading: false, error: 'Sua sessão expirou por segurança. Faça login novamente.' });
       return;
     }
 

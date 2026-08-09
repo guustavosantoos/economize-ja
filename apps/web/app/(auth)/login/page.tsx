@@ -132,7 +132,7 @@ export default function Login() {
                 onChange={(e) => setRememberMe(e.target.checked)}
                 className="w-4 h-4 rounded border-surface-variant dark:border-[#1f2937] accent-primary cursor-pointer"
               />
-              <span>Manter-me conectado (2 dias)</span>
+              <span>Manter-me conectado</span>
             </label>
           </div>
 
