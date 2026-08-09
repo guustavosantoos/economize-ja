@@ -1,0 +1,260 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-primary: #003535;
+  --color-primary-container: #0d4d4d;
+  --color-primary-fixed: #b4edec;
+  --color-primary-fixed-dim: #98d1d0;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #85bdbc;
+  --color-secondary: #006c49;
+  --color-secondary-container: #6cf8bb;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #00714d;
+  --color-tertiary: #65000a;
+  --color-tertiary-container: #8f0012;
+  --color-on-tertiary: #ffffff;
+  --color-on-tertiary-container: #ff958e;
+  --color-error: #e11d48;
+  --color-error-container: #ffe4e6;
+  --color-on-error: #ffffff;
+  --color-on-error-container: #9f1239;
+  --color-surface: #f8fafc;
+  --color-surface-bright: #f8fafc;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f1f5f9;
+  --color-surface-container: #e2e8f0;
+  --color-surface-container-high: #cbd5e1;
+  --color-surface-container-highest: #94a3b8;
+  --color-surface-dim: #cbd5e1;
+  --color-surface-tint: #003535;
+  --color-surface-variant: #e2e8f0;
+  --color-on-surface: #0f172a;
+  --color-on-surface-variant: #475569;
+  --color-outline: #64748b;
+  --color-outline-variant: #cbd5e1;
+  --color-background: #f8fafc;
+  --color-on-background: #0f172a;
+}
+
+/* ─── Reset Base ─────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Tabular Numbers for Professional Financial Apps */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* ─── Light Mode Defaults (Clean, Handcrafted Studio Look) ───── */
+:root, html, [data-theme="light"] {
+  --bg-main: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-subtle: #f1f5f9;
+  --border-card: #e2e8f0;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-primary-accent: #003535;
+  color-scheme: light;
+}
+
+/* ─── Dark Mode Overrides (Sleek Modern Charcoal & Slate) ───── */
+html.dark, [data-theme="dark"] {
+  --bg-main: #090d12;
+  --bg-card: #111827;
+  --bg-subtle: #1f2937;
+  --border-card: #1f2937;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-primary-accent: #34d399;
+  color-scheme: dark;
+}
+
+/* Global html & body background transition */
+html, body {
+  background-color: var(--bg-main) !important;
+  color: var(--text-main) !important;
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── LIGHT MODE SPECIFIC STYLES ─────────────────────────────── */
+html:not(.dark) body,
+html:not(.dark) .bg-background {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+html:not(.dark) .bg-white {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+}
+
+html:not(.dark) .bg-surface-variant {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+html:not(.dark) .bg-surface-container {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+html:not(.dark) input:not(.bg-transparent) {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+html:not(.dark) input::placeholder {
+  color: #94a3b8 !important;
+}
+
+html:not(.dark) .text-primary {
+  color: #003535 !important;
+}
+
+html:not(.dark) .text-on-surface {
+  color: #0f172a !important;
+}
+
+html:not(.dark) .text-on-surface-variant {
+  color: #475569 !important;
+}
+
+html:not(.dark) .text-outline {
+  color: #64748b !important;
+}
+
+html:not(.dark) .bg-primary {
+  background-color: #003535 !important;
+  color: #ffffff !important;
+}
+
+/* ─── DARK MODE SPECIFIC STYLES ──────────────────────────────── */
+html.dark body,
+html.dark .bg-background {
+  background-color: #090d12 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .bg-white {
+  background-color: #111827 !important;
+  color: #f8fafc !important;
+  border-color: #1f2937 !important;
+}
+
+html.dark .bg-surface-variant {
+  background-color: #1f2937 !important;
+  color: #e2e8f0 !important;
+}
+
+html.dark .bg-surface-container {
+  background-color: #1a2234 !important;
+  color: #f8fafc !important;
+}
+
+html.dark input:not(.bg-transparent) {
+  background-color: #1f2937 !important;
+  color: #f8fafc !important;
+  border-color: #374151 !important;
+}
+
+html.dark input::placeholder {
+  color: #6b7280 !important;
+}
+
+html.dark .text-primary {
+  color: #34d399 !important;
+}
+
+html.dark .text-on-surface {
+  color: #f8fafc !important;
+}
+
+html.dark .text-on-surface-variant {
+  color: #cbd5e1 !important;
+}
+
+html.dark .text-outline {
+  color: #94a3b8 !important;
+}
+
+html.dark .bg-primary {
+  background-color: #047857 !important;
+  color: #ffffff !important;
+}
+
+html.dark .border-surface-variant,
+html.dark .border-outline-variant {
+  border-color: #1f2937 !important;
+}
+
+html.dark .divide-surface-variant > * + * {
+  border-color: #1f2937 !important;
+}
+
+/* ─── Custom Scrollbar for Handcrafted Feel ──────────────────── */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: #374151;
+}
+
+/* ─── Interactive elements ───────────────────────────────────── */
+button,
+a,
+[role="button"],
+select,
+input,
+label {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+button,
+a,
+[role="button"] {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ─── Material Symbols ───────────────────────────────────────── */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  user-select: none;
+  pointer-events: none;
+}
+
+.material-symbols-outlined.filled {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
