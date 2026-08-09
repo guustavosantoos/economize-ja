@@ -263,17 +263,17 @@ function NewTransactionForm() {
         {/* Form Inputs */}
         <div className="bg-white dark:bg-[#151d27] p-6 rounded-3xl border border-surface-variant dark:border-[#253346] shadow-sm space-y-4">
           <div>
-            <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center justify-between mb-2">
               <label className="text-xs font-bold text-on-surface block">
                 Categoria
               </label>
               <button
                 type="button"
                 onClick={() => setShowCategoryModal(true)}
-                className="text-xs font-extrabold text-primary dark:text-[#2dd4bf] hover:underline flex items-center gap-1"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/10 dark:bg-[#2dd4bf]/10 text-primary dark:text-[#2dd4bf] hover:bg-primary/20 transition-all font-bold text-[11px] active:scale-95"
               >
-                <span className="material-symbols-outlined text-sm">add_circle</span>
-                <span>Nova Categoria</span>
+                <span className="material-symbols-outlined text-sm leading-none">add_circle</span>
+                <span className="leading-none">Nova Categoria</span>
               </button>
             </div>
             <div className="relative">

@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { config } from './config';
 
+console.log(`[Bot API Client] Conectando na API em: ${config.internalApiUrl}`);
+
 const client = axios.create({
   baseURL: config.internalApiUrl,
   headers: { 'x-internal-secret': config.internalApiSecret },
