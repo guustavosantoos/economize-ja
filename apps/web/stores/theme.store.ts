@@ -16,8 +16,8 @@ export const useThemeStore = create<ThemeState>((set, get) => ({
   initTheme: () => {
     if (typeof window === 'undefined') return;
     const savedTheme = localStorage.getItem('ej_theme') as 'light' | 'dark' | null;
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const initialTheme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+    // Sempre inicia no light mode por padrão, a não ser que o usuário tenha escolhido dark
+    const initialTheme = savedTheme ?? 'light';
 
     set({ theme: initialTheme });
     if (initialTheme === 'dark') {

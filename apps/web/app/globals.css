@@ -62,15 +62,15 @@
   color-scheme: light;
 }
 
-/* ─── Dark Mode Overrides (Sleek Modern Charcoal & Slate) ───── */
+/* ─── Dark Mode Overrides (Premium Charcoal & Teal) ─────────── */
 html.dark, [data-theme="dark"] {
-  --bg-main: #090d12;
-  --bg-card: #111827;
-  --bg-subtle: #1f2937;
-  --border-card: #1f2937;
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --text-primary-accent: #34d399;
+  --bg-main: #0d1117;
+  --bg-card: #161b22;
+  --bg-subtle: #21262d;
+  --border-card: #30363d;
+  --text-main: #e6edf3;
+  --text-muted: #8b949e;
+  --text-primary-accent: #2dd4bf;
   color-scheme: dark;
 }
 
@@ -142,64 +142,64 @@ html:not(.dark) .bg-primary {
 /* ─── DARK MODE SPECIFIC STYLES ──────────────────────────────── */
 html.dark body,
 html.dark .bg-background {
-  background-color: #090d12 !important;
-  color: #f8fafc !important;
+  background-color: #0d1117 !important;
+  color: #e6edf3 !important;
 }
 
 html.dark .bg-white {
-  background-color: #111827 !important;
-  color: #f8fafc !important;
-  border-color: #1f2937 !important;
+  background-color: #161b22 !important;
+  color: #e6edf3 !important;
+  border-color: #30363d !important;
 }
 
 html.dark .bg-surface-variant {
-  background-color: #1f2937 !important;
-  color: #e2e8f0 !important;
+  background-color: #21262d !important;
+  color: #c9d1d9 !important;
 }
 
 html.dark .bg-surface-container {
-  background-color: #1a2234 !important;
-  color: #f8fafc !important;
+  background-color: #1c2128 !important;
+  color: #e6edf3 !important;
 }
 
 html.dark input:not(.bg-transparent) {
-  background-color: #1f2937 !important;
-  color: #f8fafc !important;
-  border-color: #374151 !important;
+  background-color: #21262d !important;
+  color: #e6edf3 !important;
+  border-color: #30363d !important;
 }
 
 html.dark input::placeholder {
-  color: #6b7280 !important;
+  color: #6e7681 !important;
 }
 
 html.dark .text-primary {
-  color: #34d399 !important;
+  color: #2dd4bf !important;
 }
 
 html.dark .text-on-surface {
-  color: #f8fafc !important;
+  color: #e6edf3 !important;
 }
 
 html.dark .text-on-surface-variant {
-  color: #cbd5e1 !important;
+  color: #c9d1d9 !important;
 }
 
 html.dark .text-outline {
-  color: #94a3b8 !important;
+  color: #8b949e !important;
 }
 
 html.dark .bg-primary {
-  background-color: #047857 !important;
+  background-color: #0d9488 !important;
   color: #ffffff !important;
 }
 
 html.dark .border-surface-variant,
 html.dark .border-outline-variant {
-  border-color: #1f2937 !important;
+  border-color: #30363d !important;
 }
 
 html.dark .divide-surface-variant > * + * {
-  border-color: #1f2937 !important;
+  border-color: #30363d !important;
 }
 
 /* ─── Custom Scrollbar for Handcrafted Feel ──────────────────── */
