@@ -273,7 +273,7 @@ function NewTransactionForm() {
                 className="text-xs font-extrabold text-primary dark:text-[#2dd4bf] hover:underline flex items-center gap-1"
               >
                 <span className="material-symbols-outlined text-sm">add_circle</span>
-                + Nova Categoria
+                <span>Nova Categoria</span>
               </button>
             </div>
             <div className="relative">
