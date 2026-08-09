@@ -14,21 +14,20 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
-RUN npm run build --workspace=apps/web
+RUN cd apps/web && npx next build
 
 FROM node:20-alpine AS runner
 
-WORKDIR /app
+WORKDIR /app/apps/web
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-COPY --from=builder /app/apps/web/.next ./apps/web/.next
-COPY --from=builder /app/apps/web/public ./apps/web/public
-COPY --from=builder /app/apps/web/package*.json ./apps/web/
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/apps/web/.next ./.next
+COPY --from=builder /app/apps/web/public ./public
+COPY --from=builder /app/apps/web/package*.json ./
+COPY --from=builder /app/apps/web/node_modules ./node_modules
 
 EXPOSE 3000
 
-CMD ["npm", "run", "start", "--workspace=apps/web"]
+CMD ["./node_modules/.bin/next", "start", "-p", "3000"]
