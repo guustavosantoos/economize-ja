@@ -26,33 +26,52 @@ export class MailService {
     const senderEmail = this.configService.get('MAIL_FROM_EMAIL') || 'guuh.santos153@gmail.com';
     const senderName = this.configService.get('MAIL_FROM_NAME') || 'Economize Já';
 
-    // 1. Brevo REST API (Suporta envio gratuito para qualquer e-mail sem precisar de domínio pago)
+    const formattedHtml = html.includes('<html') || html.includes('<div')
+      ? html
+      : `
+        <div style="font-family: system-ui, -apple-system, sans-serif; background-color: #f8fafc; padding: 24px; color: #0f172a;">
+          <div style="max-width: 480px; margin: 0 auto; background: #ffffff; padding: 32px; border-radius: 16px; border: 1px solid #e2e8f0; shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+            <div style="text-align: center; margin-bottom: 24px;">
+              <h1 style="color: #003535; font-size: 22px; font-weight: 800; margin: 0;">Economize Já</h1>
+              <p style="color: #64748b; font-size: 12px; margin-top: 4px;">Seu controle financeiro pessoal</p>
+            </div>
+            <div style="font-size: 14px; line-height: 1.6; color: #334155;">
+              ${html.replace(/\n/g, '<br/>')}
+            </div>
+            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+            <p style="font-size: 11px; color: #94a3b8; margin: 0; text-align: center;">Este e-mail foi enviado automaticamente pelo Economize Já.</p>
+          </div>
+        </div>
+      `;
+
+    // 1. Brevo REST API
     if (brevoApiKey) {
       try {
-        await axios.post(
+        const response = await axios.post(
           'https://api.brevo.com/v3/smtp/email',
           {
             sender: { name: senderName, email: senderEmail },
             to: [{ email: to }],
             subject,
-            htmlContent: html.replace(/\n/g, '<br/>'),
+            htmlContent: formattedHtml,
           },
           {
             headers: {
-              'api-key': brevoApiKey,
+              'api-key': brevoApiKey.trim(),
               'Content-Type': 'application/json',
               Accept: 'application/json',
             },
           }
         );
-        console.log(`[Brevo] E-mail enviado com sucesso para ${to}!`);
+        console.log(`[Brevo Success] E-mail enviado para ${to}! MessageId: ${response.data?.messageId || 'OK'}`);
         return;
       } catch (err: any) {
-        console.error('[Brevo Error]:', err?.response?.data || err.message);
+        console.error('[Brevo Error Status]:', err?.response?.status);
+        console.error('[Brevo Error Data]:', JSON.stringify(err?.response?.data || err.message));
       }
     }
 
-    // 2. Resend API
+    // 2. Resend API Fallback
     if (this.resend) {
       const fromAddress = this.configService.get('MAIL_FROM') || 'Economize Já <onboarding@resend.dev>';
       try {
@@ -60,9 +79,9 @@ export class MailService {
           from: fromAddress,
           to,
           subject,
-          html,
+          html: formattedHtml,
         });
-        console.log(`[Resend] E-mail enviado para ${to}!`);
+        console.log(`[Resend Success] E-mail enviado para ${to}!`);
       } catch (e) {
         console.error('Falha ao enviar e-mail via Resend:', e);
       }
