@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Req, Res, UseGuards, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -8,6 +8,13 @@ import { Public } from '../common/decorators/public.decorator';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
+
+const cookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
+  maxAge: 30 * 24 * 60 * 60 * 1000,
+};
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -29,13 +36,8 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'E-mail validado e login efetuado com sucesso' })
   async verifyEmail(@Body() dto: VerifyEmailDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const { accessToken, refreshToken, user } = await this.authService.verifyEmailCode(dto, req);
-    res.cookie('refresh_token', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-    });
-    return { data: { accessToken, user } };
+    res.cookie('refresh_token', refreshToken, cookieOptions);
+    return { data: { accessToken, refreshToken, user } };
   }
 
   @Public()
@@ -50,17 +52,12 @@ export class AuthController {
   @Throttle({ default: { limit: 10, ttl: 15 * 60 * 1000 } })
   @Post('login')
   @ApiOperation({ summary: 'Fazer login e obter JWT access token' })
-  @ApiResponse({ status: 200, description: 'Login efetuado com sucesso (retorna accessToken e salva cookie refresh_token)' })
+  @ApiResponse({ status: 200, description: 'Login efetuado com sucesso' })
   @ApiResponse({ status: 401, description: 'Credenciais inválidas' })
   async login(@Body() dto: LoginDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const { accessToken, refreshToken } = await this.authService.login(dto, req);
-    res.cookie('refresh_token', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-    });
-    return { data: { accessToken } };
+    res.cookie('refresh_token', refreshToken, cookieOptions);
+    return { data: { accessToken, refreshToken } };
   }
 
   @Public()
@@ -71,29 +68,19 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Login via Google efetuado com sucesso' })
   async googleAuth(@Body() dto: GoogleAuthDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const { accessToken, refreshToken, user } = await this.authService.googleAuth(dto, req);
-    res.cookie('refresh_token', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-    });
-    return { data: { accessToken, user } };
+    res.cookie('refresh_token', refreshToken, cookieOptions);
+    return { data: { accessToken, refreshToken, user } };
   }
 
   @Public()
   @Post('refresh')
-  @ApiOperation({ summary: 'Renovar access token usando cookie httpOnly refresh_token' })
+  @ApiOperation({ summary: 'Renovar access token usando cookie httpOnly ou body' })
   @ApiResponse({ status: 200, description: 'Novo accessToken gerado' })
-  async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    const token = req.cookies?.refresh_token;
-    if (!token) return { data: null };
-    const { accessToken, refreshToken } = await this.authService.refresh(token, req);
-    res.cookie('refresh_token', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-    });
-    return { data: { accessToken } };
+  async refresh(@Body('refreshToken') bodyRefreshToken: string, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const token = req.cookies?.refresh_token || bodyRefreshToken;
+    if (!token) throw new UnauthorizedException('Refresh token não fornecido');
+    const { accessToken, refreshToken: newRefreshToken } = await this.authService.refresh(token, req);
+    res.cookie('refresh_token', newRefreshToken, cookieOptions);
+    return { data: { accessToken, refreshToken: newRefreshToken } };
   }
 }

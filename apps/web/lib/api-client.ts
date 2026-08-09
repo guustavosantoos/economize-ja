@@ -11,15 +11,23 @@ export function getApiUrl(): string {
 
 async function refreshAccessToken(): Promise<boolean> {
   try {
+    const storedRefreshToken = typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null;
     const res = await fetch(`${getApiUrl()}/auth/refresh`, {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken: storedRefreshToken }),
       credentials: 'include',
     });
     if (!res.ok) return false;
     const resData = await res.json();
-    const token = resData?.data?.accessToken || resData?.accessToken;
+    const payload = resData?.data || resData;
+    const token = payload?.accessToken;
+    const newRefreshToken = payload?.refreshToken;
     if (token) {
       localStorage.setItem('accessToken', token);
+      if (newRefreshToken) {
+        localStorage.setItem('refreshToken', newRefreshToken);
+      }
       return true;
     }
     return false;
