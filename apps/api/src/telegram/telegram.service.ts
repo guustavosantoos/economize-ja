@@ -123,36 +123,53 @@ export class TelegramService {
     let currentBalance = 0;
     allTxs.forEach((t) => {
       const amt = Number(t.amount);
-      if (t.type === 'income') currentBalance += amt;
-      else if (t.type === 'expense') currentBalance -= amt;
+      if (t.type === 'income') {
+        currentBalance += amt;
+      } else if (t.type === 'expense' && t.paymentMethod !== 'credit') {
+        // Apenas despesas no DÉBITO descontam do saldo de caixa acumulado
+        currentBalance -= amt;
+      }
     });
 
     let totalIncome = 0;
     let totalExpense = 0;
+    let totalCreditExpense = 0;
+    let totalDebitExpense = 0;
+
     currentTxs.forEach((t) => {
       const amt = Number(t.amount);
-      if (t.type === 'income') totalIncome += amt;
-      else if (t.type === 'expense') totalExpense += amt;
+      if (t.type === 'income') {
+        totalIncome += amt;
+      } else if (t.type === 'expense') {
+        totalExpense += amt;
+        if (t.paymentMethod === 'credit') {
+          totalCreditExpense += amt;
+        } else {
+          totalDebitExpense += amt;
+        }
+      }
     });
 
-    const netMonth = totalIncome - totalExpense;
+    const netMonth = totalIncome - totalDebitExpense;
     let status: 'surplus' | 'deficit' | 'balanced' = 'balanced';
     if (netMonth > 0) status = 'surplus';
     else if (netMonth < 0) status = 'deficit';
 
     const creditCardLimit = user?.creditCardLimit ? Number(user.creditCardLimit) : 0;
-    const remainingLimit = Math.max(0, creditCardLimit - totalExpense);
-    const limitPercentage = creditCardLimit > 0 ? Math.round((totalExpense / creditCardLimit) * 100) : 0;
+    const remainingLimit = Math.max(0, creditCardLimit - totalCreditExpense);
+    const limitPercentage = creditCardLimit > 0 ? Math.round((totalCreditExpense / creditCardLimit) * 100) : 0;
 
     return {
       currentBalance,
       totalIncome,
       totalExpense,
+      totalCreditExpense,
+      totalDebitExpense,
       netMonth,
       status,
       creditCard: {
         limit: creditCardLimit,
-        spent: totalExpense,
+        spent: totalCreditExpense,
         remaining: remainingLimit,
         percentage: limitPercentage,
       },
@@ -180,6 +197,7 @@ export class TelegramService {
       data: {
         userId: link.userId,
         type: dto.type,
+        paymentMethod: dto.paymentMethod || 'debit',
         amount: dto.amount,
         date: new Date(dto.date),
         description: dto.description,
@@ -189,9 +207,9 @@ export class TelegramService {
 
     await this.audit.log(link.userId, 'bot_transaction_created', {}, { txId: tx.id });
 
-    // Verificar se atingiu limite do cartão de crédito
+    // Verificar se atingiu limite do cartão de crédito (apenas para despesas no cartão)
     let creditCardAlert: string | null = null;
-    if (dto.type === 'expense') {
+    if (dto.type === 'expense' && dto.paymentMethod === 'credit') {
       const user = await this.prisma.user.findUnique({
         where: { id: link.userId },
         select: { creditCardLimit: true },
@@ -201,19 +219,25 @@ export class TelegramService {
       if (limit > 0) {
         const now = new Date();
         const firstDayCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        const monthExpenses = await this.prisma.transaction.aggregate({
-          where: { userId: link.userId, type: 'expense', deletedAt: null, date: { gte: firstDayCurrentMonth } },
+        const creditExpenses = await this.prisma.transaction.aggregate({
+          where: {
+            userId: link.userId,
+            type: 'expense',
+            paymentMethod: 'credit',
+            deletedAt: null,
+            date: { gte: firstDayCurrentMonth }
+          },
           _sum: { amount: true },
         });
 
-        const totalSpent = Number(monthExpenses._sum.amount || 0);
-        const pct = Math.round((totalSpent / limit) * 100);
-        const remaining = Math.max(0, limit - totalSpent);
+        const totalCreditSpent = Number(creditExpenses._sum.amount || 0);
+        const pct = Math.round((totalCreditSpent / limit) * 100);
+        const remaining = Math.max(0, limit - totalCreditSpent);
 
-        if (totalSpent > limit) {
-          creditCardAlert = `🚨 *ALERTA DE LIMITE EXCEDIDO!* Você ultrapassou seu limite de cartão em R$ ${(totalSpent - limit).toFixed(2)}. Total gasto: R$ ${totalSpent.toFixed(2)} de R$ ${limit.toFixed(2)}.`;
+        if (totalCreditSpent > limit) {
+          creditCardAlert = `🚨 *ALERTA DE LIMITE EXCEDIDO!* Você ultrapassou seu limite de cartão em R$ ${(totalCreditSpent - limit).toFixed(2)}. Gastos no Cartão: R$ ${totalCreditSpent.toFixed(2)} de R$ ${limit.toFixed(2)}.`;
         } else if (pct >= 90) {
-          creditCardAlert = `⚠️ *Atenção:* Você atingiu *${pct}%* do seu limite de cartão. Restam apenas R$ ${remaining.toFixed(2)} disponíveis!`;
+          creditCardAlert = `⚠️ *Atenção:* Você atingiu *${pct}%* do seu limite de cartão de crédito. Restam apenas R$ ${remaining.toFixed(2)} disponíveis!`;
         } else if (pct >= 70) {
           creditCardAlert = `💡 *Aviso de Limite:* Você já utilizou *${pct}%* do seu limite de cartão de crédito. Restam R$ ${remaining.toFixed(2)}.`;
         }

@@ -45,6 +45,7 @@ export const api = {
     amount: number;
     date: string;
     source: string;
+    paymentMethod?: string;
   }) => {
     const res = await client.post('/telegram/internal/create-transaction', {
       chatId,

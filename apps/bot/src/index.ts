@@ -106,15 +106,24 @@ bot.command('resumo', async (ctx) => {
       return ctx.reply('⚠️ Sua conta não está vinculada. Use `/vincular CODIGO` para conectar.', { parse_mode: 'Markdown' });
     }
 
-    const { totalIncome, totalExpense, netMonth, currentBalance, status, creditCard } = summary;
+    const {
+      totalIncome,
+      totalExpense,
+      totalCreditExpense = 0,
+      totalDebitExpense = 0,
+      netMonth,
+      currentBalance,
+      status,
+      creditCard
+    } = summary;
 
     let statusMsg = '';
     if (status === 'surplus') {
-      statusMsg = `🟢 *No Azul:* Suas receitas superaram os gastos em *${formatBRL(netMonth)}* este mês!`;
+      statusMsg = `🟢 *No Azul:* Suas receitas no débito superaram as saídas em *${formatBRL(netMonth)}* este mês!`;
     } else if (status === 'deficit') {
-      statusMsg = `🔴 *No Vermelho:* Seus gastos superaram as receitas em *${formatBRL(Math.abs(netMonth))}* este mês.`;
+      statusMsg = `🔴 *No Vermelho:* Suas despesas no débito superaram a receita em *${formatBRL(Math.abs(netMonth))}* este mês.`;
     } else {
-      statusMsg = `🟡 *Equilibrado:* Entradas e saídas se equivalem este mês.`;
+      statusMsg = `🟡 *Equilibrado:* Entradas e saídas no débito se equivalem este mês.`;
     }
 
     const now = new Date();
@@ -122,17 +131,21 @@ bot.command('resumo', async (ctx) => {
     const formattedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
 
     const cardInfo = creditCard && creditCard.limit > 0
-      ? `\n💳 *Cartão de Crédito:* ${formatBRL(creditCard.spent)} de ${formatBRL(creditCard.limit)} (${creditCard.percentage}% utilizado)`
-      : '';
+      ? `\n💳 *Fatura Cartão de Crédito:* ${formatBRL(creditCard.spent)} de ${formatBRL(creditCard.limit)} (${creditCard.percentage}% utilizado)`
+      : totalCreditExpense > 0
+        ? `\n💳 *Gastos no Cartão de Crédito:* ${formatBRL(totalCreditExpense)}`
+        : '';
 
     return ctx.reply([
       `📊 *Resumo Financeiro — ${formattedMonth}*`,
       '',
       `💰 *Entradas (Receitas):* ${formatBRL(totalIncome)}`,
-      `💸 *Saídas (Despesas):* ${formatBRL(totalExpense)}`,
+      `💸 *Saídas Totais:* ${formatBRL(totalExpense)}`,
+      `   • 💳 *Cartão de Crédito:* ${formatBRL(totalCreditExpense)}`,
+      `   • 💵 *Débito / Pix:* ${formatBRL(totalDebitExpense)}`,
       `───────────────`,
-      `⚖️ *Balanço do Mês:* ${netMonth >= 0 ? '+' : ''}${formatBRL(netMonth)}`,
-      `💵 *Saldo Total Acumulado:* ${formatBRL(currentBalance)}`,
+      `⚖️ *Balanço no Débito (Mês):* ${netMonth >= 0 ? '+' : ''}${formatBRL(netMonth)}`,
+      `💵 *Saldo Atual em Conta:* ${formatBRL(currentBalance)}`,
       cardInfo,
       '',
       statusMsg,
@@ -317,9 +330,16 @@ bot.on(message('text'), async (ctx) => {
 
   // Confirmação antes de gravar
   const typeLabel = parsed.type === 'income' ? '➕ Receita' : '➖ Despesa';
+  const paymentLabel = parsed.type === 'income'
+    ? ''
+    : parsed.paymentMethod === 'credit'
+      ? '💳 Cartão de Crédito'
+      : '💵 Débito / Pix';
+
   const msg = [
     '📝 *Entendi:*',
     `• Tipo: ${typeLabel}`,
+    ...(parsed.type === 'expense' ? [`• Pagamento: ${paymentLabel}`] : []),
     `• Descrição: ${parsed.description}`,
     `• Valor: ${formatBRL(parsed.amount)}`,
     `• Data: ${formatDate(parsed.date)}`,

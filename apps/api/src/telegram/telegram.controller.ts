@@ -52,6 +52,11 @@ export class InternalCreateTransactionDto {
   @IsString()
   @IsOptional()
   source?: string;
+
+  @ApiProperty({ example: 'credit', required: false, description: 'Método de pagamento: credit ou debit' })
+  @IsString()
+  @IsOptional()
+  paymentMethod?: 'credit' | 'debit';
 }
 
 @ApiTags('Telegram')
