@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../stores/auth.store';
 
@@ -16,20 +16,9 @@ export default function GoogleAuthButton({ mode = 'login' }: Props) {
   const [nameInput, setNameInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const googleContainerRef = useRef<HTMLDivElement>(null);
 
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-
-  useEffect(() => {
-    // Only load Google SDK script if a real Google Client ID is configured in .env
-    if (googleClientId && typeof window !== 'undefined' && !document.getElementById('google-gsi-script')) {
-      const script = document.createElement('script');
-      script.id = 'google-gsi-script';
-      script.src = 'https://accounts.google.com/gsi/client';
-      script.async = true;
-      script.defer = true;
-      document.body.appendChild(script);
-    }
-  }, [googleClientId]);
 
   const parseJwt = (token: string) => {
     try {
@@ -45,33 +34,6 @@ export default function GoogleAuthButton({ mode = 'login' }: Props) {
     } catch {
       return null;
     }
-  };
-
-  const handleGoogleClick = () => {
-    const google = (window as any).google;
-    // If real Google Client ID is configured and GSI is ready
-    if (googleClientId && google?.accounts?.id) {
-      try {
-        google.accounts.id.initialize({
-          client_id: googleClientId,
-          callback: async (response: any) => {
-            if (response?.credential) {
-              const payload = parseJwt(response.credential);
-              if (payload?.email) {
-                await executeGoogleLogin(payload.email, payload.name, payload.sub, response.credential);
-              }
-            }
-          },
-        });
-        google.accounts.id.prompt();
-        return;
-      } catch (e) {
-        console.warn('Google GSI Prompt Fallback:', e);
-      }
-    }
-
-    // Interactive Google Auth Dialog (desenvolvimento / sem Client ID no .env)
-    setShowModal(true);
   };
 
   const executeGoogleLogin = async (email: string, name?: string, googleId?: string, credential?: string) => {
@@ -94,6 +56,53 @@ export default function GoogleAuthButton({ mode = 'login' }: Props) {
     }
   };
 
+  useEffect(() => {
+    if (!googleClientId || typeof window === 'undefined') return;
+
+    const initGsi = () => {
+      const google = (window as any).google;
+      if (google?.accounts?.id && googleContainerRef.current) {
+        try {
+          google.accounts.id.initialize({
+            client_id: googleClientId,
+            callback: async (response: any) => {
+              if (response?.credential) {
+                const payload = parseJwt(response.credential);
+                if (payload?.email) {
+                  await executeGoogleLogin(payload.email, payload.name, payload.sub, response.credential);
+                }
+              }
+            },
+          });
+
+          // Renderizar o botão oficial nativo do Google
+          googleContainerRef.current.innerHTML = '';
+          google.accounts.id.renderButton(googleContainerRef.current, {
+            theme: 'outline',
+            size: 'large',
+            width: 340,
+            text: mode === 'login' ? 'continue_with' : 'signup_with',
+            locale: 'pt-BR',
+          });
+        } catch (err) {
+          console.warn('Erro ao inicializar Google GSI:', err);
+        }
+      }
+    };
+
+    if ((window as any).google?.accounts?.id) {
+      initGsi();
+    } else {
+      const script = document.createElement('script');
+      script.id = 'google-gsi-script';
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      script.onload = initGsi;
+      document.body.appendChild(script);
+    }
+  }, [googleClientId, mode]);
+
   const handleConfirmGoogleAuth = (e: React.FormEvent) => {
     e.preventDefault();
     if (!gmailInput) return;
@@ -102,33 +111,41 @@ export default function GoogleAuthButton({ mode = 'login' }: Props) {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={handleGoogleClick}
-        className="w-full bg-white dark:bg-[#111827] text-on-surface dark:text-slate-200 border border-surface-variant dark:border-[#1f2937] hover:bg-slate-50 dark:hover:bg-[#1a2234] transition-all font-bold text-xs shadow-xs rounded-xl py-3.5 px-4 flex items-center justify-center gap-3 active:scale-98"
-      >
-        <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
-          <path
-            fill="#4285F4"
-            d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
-          />
-          <path
-            fill="#34A853"
-            d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.27v3.15C3.25 21.3 7.31 24 12 24z"
-          />
-          <path
-            fill="#FBBC05"
-            d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.27C.46 8.2.01 10.05.01 12s.45 3.8 1.26 5.42l4.01-3.15z"
-          />
-          <path
-            fill="#EA4335"
-            d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.25 2.7 1.27 6.58l4.01 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
-          />
-        </svg>
-        <span>{mode === 'login' ? 'Continuar com o Google' : 'Cadastrar com o Google'}</span>
-      </button>
+      {/* Se o Client ID do Google existir e estiver configurado, renderiza o botão oficial do Google */}
+      {googleClientId ? (
+        <div className="w-full flex justify-center my-1">
+          <div ref={googleContainerRef} className="w-full min-h-[44px] flex justify-center" />
+        </div>
+      ) : (
+        /* Fallback sem Client ID */
+        <button
+          type="button"
+          onClick={() => setShowModal(true)}
+          className="w-full bg-white dark:bg-[#111827] text-on-surface dark:text-slate-200 border border-surface-variant dark:border-[#1f2937] hover:bg-slate-50 dark:hover:bg-[#1a2234] transition-all font-bold text-xs shadow-xs rounded-xl py-3.5 px-4 flex items-center justify-center gap-3 active:scale-98"
+        >
+          <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
+            <path
+              fill="#4285F4"
+              d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
+            />
+            <path
+              fill="#34A853"
+              d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.27v3.15C3.25 21.3 7.31 24 12 24z"
+            />
+            <path
+              fill="#FBBC05"
+              d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.27C.46 8.2.01 10.05.01 12s.45 3.8 1.26 5.42l4.01-3.15z"
+            />
+            <path
+              fill="#EA4335"
+              d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.25 2.7 1.27 6.58l4.01 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+            />
+          </svg>
+          <span>{mode === 'login' ? 'Continuar com o Google' : 'Cadastrar com o Google'}</span>
+        </button>
+      )}
 
-      {/* Floating Studio Google Sign-In Dialog */}
+      {/* Floating Studio Google Sign-In Dialog (Modo Fallback/Dev) */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-md" onClick={() => setShowModal(false)} />
