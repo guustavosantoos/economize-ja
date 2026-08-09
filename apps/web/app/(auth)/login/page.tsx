@@ -15,6 +15,7 @@ export default function Login() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -112,16 +113,28 @@ export default function Login() {
             required
             autoComplete="email"
           />
-          <input
-            data-cy="login-password-input"
-            type="password"
-            placeholder="Sua senha"
-            className="p-3.5 rounded-xl border border-surface-variant dark:border-[#1f2937] bg-white dark:bg-[#111827] text-on-surface placeholder-outline focus:outline-none focus:border-primary transition-colors text-xs font-medium"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            autoComplete="current-password"
-          />
+          <div className="relative">
+            <input
+              data-cy="login-password-input"
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Sua senha"
+              className="w-full p-3.5 pr-10 rounded-xl border border-surface-variant dark:border-[#1f2937] bg-white dark:bg-[#111827] text-on-surface placeholder-outline focus:outline-none focus:border-primary transition-colors text-xs font-medium"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors p-1 flex items-center justify-center"
+              title={showPassword ? 'Ocultar senha' : 'Exibir senha'}
+            >
+              <span className="material-symbols-outlined text-lg select-none">
+                {showPassword ? 'visibility_off' : 'visibility'}
+              </span>
+            </button>
+          </div>
 
           {/* Checkbox Manter-me Conectado */}
           <div className="flex items-center justify-between px-1 py-1">
