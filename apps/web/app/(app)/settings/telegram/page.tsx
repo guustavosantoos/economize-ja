@@ -3,8 +3,11 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { apiClient } from '../../../../lib/api-client';
+import { useAuthStore } from '../../../../stores/auth.store';
 
 export default function TelegramLink() {
+  const { user } = useAuthStore();
+  const isPro = user?.plan === 'pro';
   const [code, setCode] = useState<string | null>(null);
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
   const [linked, setLinked] = useState<boolean>(false);
@@ -77,6 +80,7 @@ export default function TelegramLink() {
   };
 
   useEffect(() => {
+    if (!isPro) return;
     // Initial check
     checkStatus().then(() => {
       generateCode();
@@ -92,7 +96,54 @@ export default function TelegramLink() {
         clearInterval(pollIntervalRef.current);
       }
     };
-  }, []);
+  }, [isPro]);
+
+  if (user && !isPro) {
+    return (
+      <div className="p-4 md:p-8 max-w-xl mx-auto pb-28 text-center space-y-6">
+        <div className="w-16 h-16 rounded-3xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center mx-auto shadow-xs">
+          <span className="material-symbols-outlined text-3xl">smart_toy</span>
+        </div>
+
+        <div className="space-y-2">
+          <span className="text-xs font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full">
+            Recurso Exclusivo PRO
+          </span>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+            Bot no Telegram com IA & Voz
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+            Envie notas de áudio por voz, textos livres e fotos de comprovantes diretamente para o assistente com inteligência artificial.
+          </p>
+        </div>
+
+        <div className="bg-white dark:bg-[#111720] p-6 rounded-3xl border border-slate-200 dark:border-slate-800 text-left space-y-3 shadow-xs">
+          <h2 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">O que você ganha no PRO:</h2>
+          <ul className="space-y-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200">
+            <li className="flex items-center gap-2.5">
+              <span className="material-symbols-outlined text-emerald-500 text-base">mic</span>
+              Envio de notas de áudio por voz para lançar gastos sem digitar
+            </li>
+            <li className="flex items-center gap-2.5">
+              <span className="material-symbols-outlined text-emerald-500 text-base">auto_awesome</span>
+              Inteligência Artificial para reconhecer frases livres
+            </li>
+            <li className="flex items-center gap-2.5">
+              <span className="material-symbols-outlined text-emerald-500 text-base">credit_score</span>
+              Suporte a lançamentos de compras parceladas (ex: 3x de 100)
+            </li>
+          </ul>
+        </div>
+
+        <Link
+          href="/pro"
+          className="block w-full text-center text-xs font-black py-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-md transition-all hover:scale-[1.01] active:scale-95"
+        >
+          Desbloquear Bot Telegram no Plano PRO (R$ 9,74/mês)
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 max-w-lg mx-auto">

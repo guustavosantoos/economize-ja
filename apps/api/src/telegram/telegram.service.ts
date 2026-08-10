@@ -8,6 +8,11 @@ export class TelegramService {
   constructor(private prisma: PrismaService, private audit: AuditService) {}
 
   async getLinkStatus(userId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId }, select: { plan: true } });
+    if (user?.plan !== 'pro') {
+      throw new ForbiddenException('O recurso do Bot do Telegram com IA é exclusivo do Plano PRO. Faça o upgrade para continuar!');
+    }
+
     const link = await this.prisma.telegramLink.findUnique({ where: { userId } });
     if (!link) {
       return { linked: false, linkCode: null, expiresAt: null, linkedAt: null };
@@ -22,6 +27,10 @@ export class TelegramService {
   }
 
   async generateLinkCode(userId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId }, select: { plan: true } });
+    if (user?.plan !== 'pro') {
+      throw new ForbiddenException('O recurso do Bot do Telegram com IA é exclusivo do Plano PRO. Faça o upgrade para continuar!');
+    }
     const linkCode = crypto.randomBytes(4).toString('hex').toUpperCase();
     const linkCodeExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 

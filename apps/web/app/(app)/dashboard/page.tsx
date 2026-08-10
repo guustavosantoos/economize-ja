@@ -6,6 +6,7 @@ import { apiClient } from '../../../lib/api-client';
 import TransactionItem from '../../../components/TransactionItem';
 import PwaInstallPrompt from '../../../components/PwaInstallPrompt';
 import { useThemeStore } from '../../../stores/theme.store';
+import { useAuthStore } from '../../../stores/auth.store';
 import {
   BarChart,
   Bar,
@@ -81,6 +82,7 @@ function formatBRL(amount: number) {
 
 export default function Dashboard() {
   const { theme, toggleTheme } = useThemeStore();
+  const { user } = useAuthStore();
   const [forceOpenPwa, setForceOpenPwa] = useState(false);
   const [isAppleDevice, setIsAppleDevice] = useState(false);
 
@@ -283,11 +285,14 @@ export default function Dashboard() {
           </button>
 
           <Link
-            href="/settings/telegram"
+            href={user?.plan === 'pro' ? '/settings/telegram' : '/pro'}
             className="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-[#0088cc] text-white hover:bg-[#0077b3] transition-all shadow-xs"
           >
             <span className="material-symbols-outlined text-base">send</span>
             Bot Telegram
+            {user?.plan !== 'pro' && (
+              <span className="bg-amber-400 text-slate-950 text-[9px] font-black uppercase px-1.5 py-0.5 rounded-md ml-0.5">PRO</span>
+            )}
           </Link>
         </div>
       </header>
