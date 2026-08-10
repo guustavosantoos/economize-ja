@@ -40,4 +40,20 @@ export class CreateTransactionDto {
   @IsString()
   @IsOptional()
   categoryId?: string;
+
+  @ApiPropertyOptional({
+    example: 'credit',
+    description: 'Método de pagamento: credit ou debit',
+  })
+  @IsString()
+  @IsOptional()
+  paymentMethod?: string;
+
+  @ApiPropertyOptional({
+    example: 5,
+    description: 'Número total de parcelas (opcional, padrão 1)',
+  })
+  @IsNumber()
+  @IsOptional()
+  installmentsCount?: number;
 }

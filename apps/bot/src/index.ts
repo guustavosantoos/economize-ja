@@ -330,18 +330,22 @@ bot.on(message('text'), async (ctx) => {
 
   // Confirmação antes de gravar
   const typeLabel = parsed.type === 'income' ? '➕ Receita' : '➖ Despesa';
+  const isInstallment = parsed.installmentsCount && parsed.installmentsCount > 1;
   const paymentLabel = parsed.type === 'income'
     ? ''
-    : parsed.paymentMethod === 'credit'
-      ? '💳 Cartão de Crédito'
-      : '💵 Débito / Pix';
+    : isInstallment
+      ? `💳 Cartão de Crédito (Parcelado em ${parsed.installmentsCount}x)`
+      : parsed.paymentMethod === 'credit'
+        ? '💳 Cartão de Crédito'
+        : '💵 Débito / Pix';
 
   const msg = [
     '📝 *Entendi:*',
     `• Tipo: ${typeLabel}`,
     ...(parsed.type === 'expense' ? [`• Pagamento: ${paymentLabel}`] : []),
     `• Descrição: ${parsed.description}`,
-    `• Valor: ${formatBRL(parsed.amount)}`,
+    `• Valor${isInstallment ? ' por parcela' : ''}: ${formatBRL(parsed.amount)}`,
+    ...(isInstallment ? [`• Total Geral: ${formatBRL(parsed.amount * parsed.installmentsCount)} (lançado automaticamente pelos próximos ${parsed.installmentsCount} meses)`] : []),
     `• Data: ${formatDate(parsed.date)}`,
     '',
     'Confirmar? Responda *sim* ou *não*',

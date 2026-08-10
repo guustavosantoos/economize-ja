@@ -53,6 +53,8 @@ function NewTransactionForm() {
   const paramDate = searchParams.get('date');
 
   const [type, setType] = useState<'expense' | 'income' | 'transfer'>('expense');
+  const [paymentMethod, setPaymentMethod] = useState<'debit' | 'credit'>('debit');
+  const [installmentsCount, setInstallmentsCount] = useState<number>(1);
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [categoryId, setCategoryId] = useState('');
@@ -145,6 +147,8 @@ function NewTransactionForm() {
       await apiClient.post('/transactions', {
         amount: numAmount,
         type,
+        paymentMethod: type === 'expense' ? paymentMethod : 'debit',
+        installmentsCount: type === 'expense' && paymentMethod === 'credit' ? installmentsCount : 1,
         categoryId: categoryId || undefined,
         description: description || undefined,
         date: new Date(date).toISOString(),
@@ -321,6 +325,85 @@ function NewTransactionForm() {
               className="w-full p-4 rounded-2xl border border-surface-variant dark:border-[#253346] bg-surface dark:bg-[#1e2836] text-on-surface font-semibold text-sm focus:outline-none focus:border-primary"
             />
           </div>
+
+          {/* Forma de Pagamento (Apenas para Despesas) */}
+          {type === 'expense' && (
+            <>
+              <div>
+                <label className="text-xs font-bold text-on-surface mb-2 block">
+                  Forma de Pagamento
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPaymentMethod('debit');
+                      setInstallmentsCount(1);
+                    }}
+                    className={`py-3 px-4 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 border transition-all ${
+                      paymentMethod === 'debit'
+                        ? 'bg-primary/10 border-primary text-primary dark:bg-[#2dd4bf]/10 dark:border-[#2dd4bf] dark:text-[#2dd4bf] shadow-sm'
+                        : 'border-surface-variant dark:border-[#253346] bg-surface dark:bg-[#1e2836] text-on-surface-variant'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-base">account_balance_wallet</span>
+                    <span>Débito / Pix</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('credit')}
+                    className={`py-3 px-4 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 border transition-all ${
+                      paymentMethod === 'credit'
+                        ? 'bg-primary/10 border-primary text-primary dark:bg-[#2dd4bf]/10 dark:border-[#2dd4bf] dark:text-[#2dd4bf] shadow-sm'
+                        : 'border-surface-variant dark:border-[#253346] bg-surface dark:bg-[#1e2836] text-on-surface-variant'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-base">credit_card</span>
+                    <span>Cartão de Crédito</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Se for no Cartão de Crédito: Opção de Parcelamento */}
+              {paymentMethod === 'credit' && (
+                <div className="bg-surface-container-low dark:bg-[#1e2836]/60 p-4 rounded-2xl border border-surface-variant dark:border-[#253346] space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-on-surface">
+                      Parcelamento
+                    </label>
+                    {installmentsCount > 1 && (
+                      <span className="text-[11px] font-bold text-primary dark:text-[#2dd4bf]">
+                        {installmentsCount} parcelas mensais
+                      </span>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <select
+                      value={installmentsCount}
+                      onChange={(e) => setInstallmentsCount(Number(e.target.value))}
+                      className="w-full p-3.5 rounded-xl border border-surface-variant dark:border-[#253346] bg-white dark:bg-[#151d27] text-on-surface font-bold text-xs focus:outline-none focus:border-primary appearance-none pr-10"
+                    >
+                      <option value={1}>1x - À vista (R$ {amount || '0,00'})</option>
+                      {[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 24].map((n) => (
+                        <option key={n} value={n}>
+                          {n}x de R$ {amount || '0,00'} / mês
+                        </option>
+                      ))}
+                    </select>
+                    <span className="material-symbols-outlined absolute right-3 top-3.5 pointer-events-none text-outline">
+                      keyboard_arrow_down
+                    </span>
+                  </div>
+                  {installmentsCount > 1 && (
+                    <p className="text-[11px] text-outline font-medium">
+                      💡 A compra será replicada automaticamente nos próximos {installmentsCount} meses (uma parcela em cada mês).
+                    </p>
+                  )}
+                </div>
+              )}
+            </>
+          )}
         </div>
 
         {/* Submit Button */}
