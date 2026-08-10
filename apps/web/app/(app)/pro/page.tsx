@@ -36,6 +36,22 @@ export default function ProPage() {
     }
   };
 
+  const handleOpenPortal = async () => {
+    setSubscribing(true);
+    try {
+      const res: any = await apiClient.post('/payments/customer-portal');
+      if (res?.url) {
+        window.location.href = res.url;
+      } else {
+        alert('Erro ao abrir portal do cliente.');
+      }
+    } catch (err: any) {
+      alert(err.message || 'Erro ao abrir portal de assinaturas da Stripe.');
+    } finally {
+      setSubscribing(false);
+    }
+  };
+
   return (
     <div className="p-4 md:p-8 max-w-3xl mx-auto pb-28 space-y-6 sm:space-y-8">
       {/* Header */}
@@ -146,9 +162,19 @@ export default function ProPage() {
         {/* CTA Button / Pro Subscriber Card */}
         <div className="space-y-3 pt-2">
           {isPro ? (
-            <div className="w-full text-center py-3.5 px-4 rounded-2xl bg-emerald-500/20 border border-emerald-400/60 text-emerald-300 font-bold text-xs sm:text-sm leading-relaxed flex items-center justify-center gap-2 shadow-inner">
-              <span className="material-symbols-outlined text-emerald-400 text-lg flex-shrink-0">workspace_premium</span>
-              <span>Você já é um assinante <strong>PRO</strong>! Todos os recursos estão liberados.</span>
+            <div className="space-y-2">
+              <div className="w-full text-center py-3.5 px-4 rounded-2xl bg-emerald-500/20 border border-emerald-400/60 text-emerald-300 font-bold text-xs sm:text-sm leading-relaxed flex items-center justify-center gap-2 shadow-inner">
+                <span className="material-symbols-outlined text-emerald-400 text-lg flex-shrink-0">workspace_premium</span>
+                <span>Você é um assinante <strong>PRO</strong>! Todos os recursos estão liberados.</span>
+              </div>
+              <button
+                onClick={handleOpenPortal}
+                disabled={subscribing}
+                className="w-full py-3 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition-all flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined text-base">manage_accounts</span>
+                {subscribing ? 'Carregando portal...' : 'Gerenciar Assinatura & Faturas (Stripe Portal)'}
+              </button>
             </div>
           ) : (
             <button

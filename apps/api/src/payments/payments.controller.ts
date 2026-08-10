@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Req, Headers, RawBodyRequest } from '@nestjs/common';
+import { Controller, Post, Body, Req, Headers } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Public } from '../common/decorators/public.decorator';
@@ -17,6 +17,13 @@ export class PaymentsController {
     @Body('cycle') cycle: 'monthly' | 'quarterly' | 'annual',
   ) {
     return this.paymentsService.createCheckoutSession(user.id, user.email, cycle || 'annual');
+  }
+
+  @ApiBearerAuth('access-token')
+  @Post('customer-portal')
+  @ApiOperation({ summary: 'Criar sessão do Portal do Cliente da Stripe para gerenciar cartão e faturas' })
+  createCustomerPortalSession(@CurrentUser() user: any) {
+    return this.paymentsService.createCustomerPortalSession(user.id, user.email);
   }
 
   @Public()

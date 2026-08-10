@@ -52,6 +52,30 @@ export class PaymentsService {
     }
   }
 
+  async createCustomerPortalSession(userId: string, email: string) {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://economize-ja-production.up.railway.app';
+
+    try {
+      const customers = await this.stripe.customers.list({ email, limit: 1 });
+      let customerId = customers.data[0]?.id;
+
+      if (!customerId) {
+        const newCustomer = await this.stripe.customers.create({ email, metadata: { userId } });
+        customerId = newCustomer.id;
+      }
+
+      const session = await this.stripe.billingPortal.sessions.create({
+        customer: customerId,
+        return_url: `${appUrl}/pro`,
+      });
+
+      return { url: session.url };
+    } catch (err: any) {
+      this.logger.error('Erro ao criar Customer Portal no Stripe', err.stack);
+      throw new BadRequestException(`Erro no Stripe Portal: ${err.message}`);
+    }
+  }
+
   async handleWebhook(body: Buffer, signature: string) {
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
     let event: Stripe.Event;
