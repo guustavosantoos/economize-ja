@@ -57,6 +57,16 @@ export class InternalCreateTransactionDto {
   @IsString()
   @IsOptional()
   paymentMethod?: 'credit' | 'debit';
+
+  @ApiProperty({ example: 1, required: false, description: 'Número de parcelas' })
+  @IsNumber()
+  @IsOptional()
+  installmentsCount?: number;
+
+  @ApiProperty({ example: 'uuid-cat', required: false, description: 'ID da Categoria' })
+  @IsString()
+  @IsOptional()
+  categoryId?: string;
 }
 
 @ApiTags('Telegram')
