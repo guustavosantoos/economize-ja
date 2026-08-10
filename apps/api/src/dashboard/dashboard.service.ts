@@ -22,33 +22,32 @@ export class DashboardService {
     const firstDayPreviousMonth = new Date(year, month - 1, 1);
     const lastDayPreviousMonth = new Date(year, month, 0, 23, 59, 59);
 
-    // Buscar usuário para limite do cartão + transações
-    const [user, allTxs, currentTxs, previousTxs] = await Promise.all([
+    // Buscar usuário para limite do cartão + transações do mês e agregações de saldo
+    const [user, currentTxs, previousTxs, incomeSum, expenseSum] = await Promise.all([
       this.prisma.user.findUnique({
         where: { id: userId },
         select: { creditCardLimit: true },
       }),
       this.prisma.transaction.findMany({
-        where: { userId, deletedAt: null },
-      }),
-      this.prisma.transaction.findMany({
         where: { userId, deletedAt: null, date: { gte: firstDayCurrentMonth, lte: lastDayCurrentMonth } },
+        select: { amount: true, type: true, paymentMethod: true },
       }),
       this.prisma.transaction.findMany({
         where: { userId, deletedAt: null, date: { gte: firstDayPreviousMonth, lte: lastDayPreviousMonth } },
+        select: { amount: true, type: true },
+      }),
+      this.prisma.transaction.aggregate({
+        where: { userId, deletedAt: null, type: 'income', date: { lte: lastDayCurrentMonth } },
+        _sum: { amount: true },
+      }),
+      this.prisma.transaction.aggregate({
+        where: { userId, deletedAt: null, type: 'expense', paymentMethod: { not: 'credit' }, date: { lte: lastDayCurrentMonth } },
+        _sum: { amount: true },
       }),
     ]);
 
-    // Saldo acumulado histórico até o mês selecionado
-    let currentBalance = 0;
-    allTxs.forEach((t) => {
-      const amt = Number(t.amount);
-      const tDate = new Date(t.date);
-      if (tDate <= lastDayCurrentMonth) {
-        if (t.type === 'income') currentBalance += amt;
-        else if (t.type === 'expense' && t.paymentMethod !== 'credit') currentBalance -= amt;
-      }
-    });
+    // Saldo acumulado histórico calculado diretamente no PostgreSQL
+    const currentBalance = Number(incomeSum._sum.amount || 0) - Number(expenseSum._sum.amount || 0);
 
     // Totais do mês selecionado
     let totalIncome = 0;
