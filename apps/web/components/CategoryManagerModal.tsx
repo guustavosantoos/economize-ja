@@ -3,17 +3,19 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '../lib/api-client';
 
-type Category = {
+export type Category = {
   id: string;
   name: string;
   type: 'expense' | 'income';
   icon: string;
   color: string;
   isDefault?: boolean;
+  showInDashboard?: boolean;
 };
 
 type CategoryManagerModalProps = {
   isOpen: boolean;
+  categories: Category[];
   onClose: () => void;
   onCategoriesChanged: () => void;
 };
@@ -58,12 +60,12 @@ const PRESET_COLORS = [
 
 export default function CategoryManagerModal({
   isOpen,
+  categories: initialCategories,
   onClose,
   onCategoriesChanged,
 }: CategoryManagerModalProps) {
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [localCategories, setLocalCategories] = useState<Category[]>(initialCategories);
   const [activeTab, setActiveTab] = useState<'expense' | 'income'>('expense');
-  const [loading, setLoading] = useState(true);
 
   // Estado para criar/editar
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
@@ -72,26 +74,17 @@ export default function CategoryManagerModal({
   const [type, setType] = useState<'expense' | 'income'>('expense');
   const [icon, setIcon] = useState('shopping_bag');
   const [color, setColor] = useState('#3b82f6');
+  const [showInDashboard, setShowInDashboard] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  const loadCategories = async () => {
-    setLoading(true);
-    try {
-      const data = await apiClient.get('/categories');
-      if (Array.isArray(data)) {
-        setCategories(data);
-      }
-    } catch {
-      // Ignorar se erro
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Atualizar estado local instantaneamente quando initialCategories muda
+  useEffect(() => {
+    setLocalCategories(initialCategories);
+  }, [initialCategories]);
 
   useEffect(() => {
     if (isOpen) {
-      loadCategories();
       setIsCreating(false);
       setEditingCategory(null);
     }
@@ -103,6 +96,7 @@ export default function CategoryManagerModal({
     setType(activeTab);
     setIcon(activeTab === 'expense' ? 'shopping_bag' : 'payments');
     setColor(activeTab === 'expense' ? '#ef4444' : '#10b981');
+    setShowInDashboard(true);
     setError('');
     setIsCreating(true);
   };
@@ -114,7 +108,29 @@ export default function CategoryManagerModal({
     setType(cat.type);
     setIcon(cat.icon || 'category');
     setColor(cat.color || '#3b82f6');
+    setShowInDashboard(cat.showInDashboard ?? true);
     setError('');
+  };
+
+  const handleToggleDashboardVisibility = async (cat: Category) => {
+    const newValue = !(cat.showInDashboard ?? true);
+
+    // Atualização otimista instantânea no estado local (0ms delay)
+    setLocalCategories((prev) =>
+      prev.map((item) => (item.id === cat.id ? { ...item, showInDashboard: newValue } : item))
+    );
+
+    try {
+      await apiClient.put(`/categories/${cat.id}`, {
+        showInDashboard: newValue,
+      });
+      onCategoriesChanged();
+    } catch {
+      // Reverter se falhar
+      setLocalCategories((prev) =>
+        prev.map((item) => (item.id === cat.id ? { ...item, showInDashboard: !newValue } : item))
+      );
+    }
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -135,6 +151,7 @@ export default function CategoryManagerModal({
           type,
           icon,
           color,
+          showInDashboard,
         });
       } else {
         // Criar
@@ -143,13 +160,13 @@ export default function CategoryManagerModal({
           type,
           icon,
           color,
+          showInDashboard,
         });
       }
 
       setIsCreating(false);
       setEditingCategory(null);
       setName('');
-      await loadCategories();
       onCategoriesChanged();
     } catch (err: any) {
       setError(err.message || 'Erro ao salvar categoria.');
@@ -161,21 +178,24 @@ export default function CategoryManagerModal({
   const handleDelete = async (cat: Category) => {
     if (!confirm(`Deseja remover a categoria "${cat.name}"?`)) return;
 
+    // Remoção otimista instantânea
+    setLocalCategories((prev) => prev.filter((item) => item.id !== cat.id));
+
     try {
       await apiClient.del(`/categories/${cat.id}`);
-      await loadCategories();
       onCategoriesChanged();
     } catch (err: any) {
       alert(err.message || 'Erro ao remover categoria.');
+      onCategoriesChanged();
     }
   };
 
   if (!isOpen) return null;
 
-  const filteredCategories = categories.filter((c) => c.type === activeTab);
+  const filteredCategories = localCategories.filter((c) => c.type === activeTab);
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 transition-all duration-200">
       <div className="bg-white dark:bg-[#111720] rounded-3xl p-6 w-full max-w-lg space-y-5 border border-slate-200 dark:border-slate-800 shadow-2xl animate-in zoom-in-95 max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 flex-shrink-0">
@@ -192,7 +212,7 @@ export default function CategoryManagerModal({
         </div>
 
         {/* Formulário de Criar/Editar */}
-        {(isCreating || editingCategory) ? (
+        {isCreating || editingCategory ? (
           <form onSubmit={handleSave} className="space-y-4 overflow-y-auto pr-1 flex-1">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-black uppercase text-slate-900 dark:text-white tracking-wider">
@@ -301,6 +321,20 @@ export default function CategoryManagerModal({
               </div>
             </div>
 
+            {/* Opção Exibir no Dashboard */}
+            <div className="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-extrabold text-slate-900 dark:text-white">Exibir em "Onde foi seu dinheiro"</p>
+                <p className="text-[11px] text-slate-500">Mostra o card desta categoria no Dashboard principal.</p>
+              </div>
+              <input
+                type="checkbox"
+                checked={showInDashboard}
+                onChange={(e) => setShowInDashboard(e.target.checked)}
+                className="w-5 h-5 accent-emerald-500 rounded cursor-pointer"
+              />
+            </div>
+
             {/* Ações */}
             <div className="pt-2 flex items-center gap-3">
               <button
@@ -336,7 +370,7 @@ export default function CategoryManagerModal({
                       : 'text-slate-500 dark:text-slate-400'
                   }`}
                 >
-                  Despesas ({categories.filter((c) => c.type === 'expense').length})
+                  Despesas ({localCategories.filter((c) => c.type === 'expense').length})
                 </button>
                 <button
                   type="button"
@@ -347,7 +381,7 @@ export default function CategoryManagerModal({
                       : 'text-slate-500 dark:text-slate-400'
                   }`}
                 >
-                  Receitas ({categories.filter((c) => c.type === 'income').length})
+                  Receitas ({localCategories.filter((c) => c.type === 'income').length})
                 </button>
               </div>
 
@@ -361,59 +395,77 @@ export default function CategoryManagerModal({
               </button>
             </div>
 
-            {loading ? (
-              <p className="text-xs text-center text-slate-400 py-6">Carregando categorias...</p>
-            ) : filteredCategories.length === 0 ? (
+            {filteredCategories.length === 0 ? (
               <div className="text-center py-6 space-y-2">
                 <p className="text-xs font-bold text-slate-500">Nenhuma categoria encontrada.</p>
-                <button
-                  onClick={handleStartCreate}
-                  className="text-xs text-emerald-600 font-extrabold underline"
-                >
+                <button onClick={handleStartCreate} className="text-xs text-emerald-600 font-extrabold underline">
                   Clique aqui para criar a primeira
                 </button>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {filteredCategories.map((cat) => (
-                  <div
-                    key={cat.id}
-                    className="p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 flex items-center justify-between gap-2 shadow-2xs"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div
-                        className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-xs"
-                        style={{ backgroundColor: cat.color || '#3b82f6' }}
-                      >
-                        <span className="material-symbols-outlined text-base">
-                          {cat.icon || 'category'}
-                        </span>
-                      </div>
-                      <span className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
-                        {cat.name}
-                      </span>
-                    </div>
+                {filteredCategories.map((cat) => {
+                  const isVisible = cat.showInDashboard ?? true;
 
-                    <div className="flex items-center gap-1 flex-shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => handleStartEdit(cat)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
-                        title="Editar Categoria"
-                      >
-                        <span className="material-symbols-outlined text-base">edit</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(cat)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
-                        title="Excluir Categoria"
-                      >
-                        <span className="material-symbols-outlined text-base">delete</span>
-                      </button>
+                  return (
+                    <div
+                      key={cat.id}
+                      className="p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 flex items-center justify-between gap-2 shadow-2xs transition-all"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div
+                          className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-xs"
+                          style={{ backgroundColor: cat.color || '#3b82f6' }}
+                        >
+                          <span className="material-symbols-outlined text-base">{cat.icon || 'category'}</span>
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-xs font-extrabold text-slate-900 dark:text-white block truncate">
+                            {cat.name}
+                          </span>
+                          <span className="text-[10px] text-slate-400 block font-medium">
+                            {isVisible ? 'Exibida no Dashboard' : 'Oculta do Dashboard'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        {/* Toggle de Exibição no Dashboard */}
+                        <button
+                          type="button"
+                          onClick={() => handleToggleDashboardVisibility(cat)}
+                          className={`p-1.5 rounded-lg transition-colors ${
+                            isVisible
+                              ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20'
+                              : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800'
+                          }`}
+                          title={isVisible ? 'Ocultar do Dashboard' : 'Exibir no Dashboard'}
+                        >
+                          <span className="material-symbols-outlined text-base">
+                            {isVisible ? 'visibility' : 'visibility_off'}
+                          </span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleStartEdit(cat)}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
+                          title="Editar Categoria"
+                        >
+                          <span className="material-symbols-outlined text-base">edit</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(cat)}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+                          title="Excluir Categoria"
+                        >
+                          <span className="material-symbols-outlined text-base">delete</span>
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

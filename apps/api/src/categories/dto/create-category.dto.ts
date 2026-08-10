@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsEnum } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsBoolean } from 'class-validator';
 import { TransactionType } from '@prisma/client';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -33,4 +33,12 @@ export class CreateCategoryDto {
   @IsString()
   @IsOptional()
   color?: string;
+
+  @ApiPropertyOptional({
+    example: true,
+    description: 'Se a categoria deve ser exibida no quadro Onde foi seu dinheiro',
+  })
+  @IsBoolean()
+  @IsOptional()
+  showInDashboard?: boolean;
 }

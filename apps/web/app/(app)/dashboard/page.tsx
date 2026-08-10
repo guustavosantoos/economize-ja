@@ -514,9 +514,9 @@ export default function Dashboard() {
           </div>
 
           <div className="grid grid-cols-2 gap-2.5 max-h-[320px] overflow-y-auto pr-0.5">
-            {allUserCategories.filter((c) => c.type === 'expense').length > 0
+            {allUserCategories.filter((c) => c.type === 'expense' && (c.showInDashboard ?? true)).length > 0
               ? allUserCategories
-                  .filter((c) => c.type === 'expense')
+                  .filter((c) => c.type === 'expense' && (c.showInDashboard ?? true))
                   .map((cat) => {
                     const spentData = categoriesData.find(
                       (cd) => cd.categoryId === cat.id || cd.name.toLowerCase() === cat.name.toLowerCase()
@@ -708,6 +708,7 @@ export default function Dashboard() {
       {/* Modal de Gerenciamento de Categorias */}
       <CategoryManagerModal
         isOpen={showCategoryManager}
+        categories={allUserCategories}
         onClose={() => setShowCategoryManager(false)}
         onCategoriesChanged={() => {
           const [yearStr, monthStr] = calendarMonth.split('-');

@@ -34,9 +34,10 @@ export class CategoriesService {
         type: dto.type,
         icon: dto.icon || (dto.type === 'income' ? 'payments' : 'shopping_bag'),
         color: dto.color || (dto.type === 'income' ? '#10b981' : '#ef4444'),
+        showInDashboard: (dto as any).showInDashboard ?? true,
         userId,
         isDefault: false,
-      },
+      } as any,
     });
   }
 
@@ -68,7 +69,7 @@ export class CategoriesService {
   async update(userId: string, id: string, dto: UpdateCategoryDto) {
     return this.prisma.category.updateMany({
       where: { id, OR: [{ userId }, { isDefault: true }] },
-      data: dto,
+      data: dto as any,
     });
   }
 
