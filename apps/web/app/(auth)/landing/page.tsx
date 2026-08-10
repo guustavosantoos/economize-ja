@@ -713,9 +713,10 @@ function SiteFooter() {
     { href: '#planos', label: 'Planos' },
     { href: '#faq', label: 'Dúvidas' },
   ];
-  const accountLinks = [
+  const legalLinks = [
+    { href: '/privacidade', label: 'Privacidade & LGPD' },
     { href: '/register', label: 'Criar conta' },
-    { href: '/login', label: 'Entrar' },
+    { href: '/login', label: 'Entrar na Conta' },
   ];
 
   return (
@@ -724,43 +725,60 @@ function SiteFooter() {
       style={{ background: 'linear-gradient(180deg, #04211F, #003535)' }}
     >
       <div className="max-w-6xl mx-auto px-5 flex flex-col gap-10">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
-          <div className="flex flex-col gap-4 max-w-xs">
-            <div className="flex items-center gap-2 font-bold text-white text-lg">
-              <Image
-                src="/logo.png"
-                alt="Economize Já Logo"
-                width={56}
-                height={56}
-                className="rounded-2xl object-contain bg-white p-1 w-14 h-14 border border-surface-variant"
-              />
+          <div className="flex flex-col gap-4 md:col-span-1">
+            <div className="flex items-center gap-2 font-black text-white text-lg">
+              <div className="w-9 h-9 rounded-xl bg-white/10 p-0.5 border border-white/20 flex items-center justify-center overflow-hidden">
+                <Image
+                  src="/logo.png"
+                  alt="Economize Já Logo"
+                  width={32}
+                  height={32}
+                  className="object-contain w-full h-full"
+                />
+              </div>
               Economize Já
             </div>
-            <p className="text-sm leading-relaxed" style={{ color: '#DDECEB' }}>
+            <p className="text-xs leading-relaxed" style={{ color: '#DDECEB' }}>
               Controle suas finanças pelo celular e pelo Telegram. Simples, seguro e feito para o seu dia a dia.
             </p>
           </div>
 
           {/* Product */}
-          <nav className="flex flex-col gap-3">
-            <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: '#98D1D0' }}>Produto</span>
+          <nav className="flex flex-col gap-2.5">
+            <span className="text-xs font-extrabold uppercase tracking-widest" style={{ color: '#98D1D0' }}>Produto</span>
             {productLinks.map((l) => (
-              <a key={l.href} href={l.href} className="text-sm transition-colors hover:text-white" style={{ color: '#DDECEB' }}>
+              <a key={l.href} href={l.href} className="text-xs transition-colors hover:text-white" style={{ color: '#DDECEB' }}>
                 {l.label}
               </a>
             ))}
           </nav>
 
-          {/* Account */}
-          <nav className="flex flex-col gap-3">
-            <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: '#98D1D0' }}>Conta</span>
-            {accountLinks.map((l) => (
-              <Link key={l.href} href={l.href} className="text-sm transition-colors hover:text-white" style={{ color: '#DDECEB' }}>
+          {/* Legal & Account */}
+          <nav className="flex flex-col gap-2.5">
+            <span className="text-xs font-extrabold uppercase tracking-widest" style={{ color: '#98D1D0' }}>Segurança & Legal</span>
+            {legalLinks.map((l) => (
+              <Link key={l.href} href={l.href} className="text-xs transition-colors hover:text-white" style={{ color: '#DDECEB' }}>
                 {l.label}
               </Link>
             ))}
           </nav>
+
+          {/* Contact */}
+          <div className="flex flex-col gap-2.5">
+            <span className="text-xs font-extrabold uppercase tracking-widest" style={{ color: '#98D1D0' }}>Contato & Suporte</span>
+            <p className="text-xs" style={{ color: '#DDECEB' }}>
+              Fale conosco para dúvidas, suporte ou requisições de dados:
+            </p>
+            <a
+              href="mailto:onboarding.economizeja@gmail.com"
+              className="text-xs font-bold text-emerald-300 hover:underline flex items-center gap-1.5"
+            >
+              <span className="material-symbols-outlined text-sm">mail</span>
+              onboarding.economizeja@gmail.com
+            </a>
+          </div>
         </div>
 
         <div
@@ -768,7 +786,9 @@ function SiteFooter() {
           style={{ borderColor: 'rgba(180,237,236,0.16)', color: '#98D1D0' }}
         >
           <span>© {new Date().getFullYear()} Economize Já. Todos os direitos reservados.</span>
-          <span>Feito para quem quer economizar de verdade.</span>
+          <Link href="/privacidade" className="hover:underline">
+            Política de Privacidade & LGPD
+          </Link>
         </div>
       </div>
     </footer>

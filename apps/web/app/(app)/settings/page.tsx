@@ -232,6 +232,14 @@ export default function Settings() {
       title: 'Privacidade & Segurança',
       items: [
         {
+          icon: 'shield',
+          label: 'Política de Privacidade & LGPD',
+          sublabel: 'Como protegemos e tratamos seus dados',
+          href: '/privacidade',
+          trailing: 'chevron_right',
+          accent: false,
+        },
+        {
           icon: 'download',
           label: 'Exportar Meus Dados',
           sublabel: 'Baixar JSON completo (Direito LGPD)',
@@ -239,6 +247,14 @@ export default function Settings() {
           trailing: exporting ? 'hourglass_top' : 'download',
           accent: false,
           loading: exporting,
+        },
+        {
+          icon: 'mail',
+          label: 'Suporte & Atendimento',
+          sublabel: 'onboarding.economizeja@gmail.com',
+          href: 'mailto:onboarding.economizeja@gmail.com',
+          trailing: 'chevron_right',
+          accent: false,
         },
       ],
     },
