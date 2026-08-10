@@ -17,6 +17,7 @@ import { OpenFinanceModule } from './open-finance/open-finance.module';
 import { AiModule } from './ai/ai.module';
 import { AuditModule } from './audit/audit.module';
 import { MailModule } from './mail/mail.module';
+import { PaymentsModule } from './payments/payments.module';
 
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -42,6 +43,7 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
     BillsModule,
     OpenFinanceModule,
     AiModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [

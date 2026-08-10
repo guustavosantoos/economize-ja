@@ -4,6 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '../../../stores/auth.store';
 
+import { apiClient } from '../../../lib/api-client';
+
 export default function ProPage() {
   const { user } = useAuthStore();
   const [cycle, setCycle] = useState<'monthly' | 'quarterly' | 'annual'>('annual');
@@ -18,12 +20,20 @@ export default function ProPage() {
   const currentPrice = priceData[cycle];
   const isPro = user?.plan === 'pro';
 
-  const handleSubscribe = () => {
+  const handleSubscribe = async () => {
     setSubscribing(true);
-    setTimeout(() => {
-      alert(`Obrigado pelo interesse no Plano PRO (${cycle.toUpperCase()})! A integração direta via Checkout Transparente da Stripe está sendo configurada.`);
+    try {
+      const res: any = await apiClient.post('/payments/checkout-session', { cycle });
+      if (res?.url) {
+        window.location.href = res.url;
+      } else {
+        alert('Erro ao redirecionar para o Checkout Stripe.');
+      }
+    } catch (err: any) {
+      alert(err.message || 'Erro ao conectar ao Checkout Stripe.');
+    } finally {
       setSubscribing(false);
-    }, 500);
+    }
   };
 
   return (
