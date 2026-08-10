@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { apiClient } from '../../../lib/api-client';
 import TransactionItem from '../../../components/TransactionItem';
+import PwaInstallPrompt from '../../../components/PwaInstallPrompt';
 import { useThemeStore } from '../../../stores/theme.store';
 import {
   BarChart,
@@ -79,6 +80,7 @@ function formatBRL(amount: number) {
 
 export default function Dashboard() {
   const { theme, toggleTheme } = useThemeStore();
+  const [forceOpenPwa, setForceOpenPwa] = useState(false);
   const [summary, setSummary] = useState<Summary | null>(null);
   const [categoriesData, setCategoriesData] = useState<CategoryData[]>([]);
   const [evolutionData, setEvolutionData] = useState<EvolutionData[]>([]);
@@ -227,6 +229,9 @@ export default function Dashboard() {
 
   return (
     <div className="p-4 sm:p-6 md:p-8 max-w-5xl mx-auto space-y-6 pb-28 text-on-surface">
+      {/* Prompt / Tutorial de Instalação do PWA */}
+      <PwaInstallPrompt forceOpen={forceOpenPwa} onCloseForce={() => setForceOpenPwa(false)} />
+
       {/* ── Top Bar Header (Crafted Studio Layout) ── */}
       <header className="flex justify-between items-center border-b border-surface-variant dark:border-slate-800 pb-5">
         <div>
@@ -237,7 +242,16 @@ export default function Dashboard() {
           <p className="text-xs text-outline dark:text-slate-400 font-medium mt-0.5">Visão consolidada do mês vigente</p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={() => setForceOpenPwa(true)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 text-xs font-extrabold hover:bg-emerald-500/20 transition-all shadow-2xs"
+            title="Como instalar o aplicativo na tela de início"
+          >
+            <span className="material-symbols-outlined text-base">install_mobile</span>
+            <span className="hidden sm:inline">Instalar App</span>
+          </button>
+
           <button
             onClick={toggleTheme}
             className="w-9 h-9 rounded-xl bg-white dark:bg-[#111827] border border-surface-variant dark:border-[#1f2937] flex items-center justify-center text-amber-500 hover:border-slate-400 transition-all shadow-xs"
