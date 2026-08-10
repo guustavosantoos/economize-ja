@@ -8,14 +8,14 @@ export class PaymentsService {
   private readonly logger = new Logger(PaymentsService.name);
 
   private readonly priceIds = {
-    monthly: process.env.STRIPE_PRICE_MONTHLY || 'price_1U2z4lE9XImvwlRiJmNOfeOa',
-    quarterly: process.env.STRIPE_PRICE_QUARTERLY || 'price_1U2z4mE9XImvwlRiBZ4BA0Uc',
-    annual: process.env.STRIPE_PRICE_ANNUAL || 'price_1U2z4nE9XImvwlRiuRC8sjSs',
+    monthly: process.env.STRIPE_PRICE_MONTHLY || 'price_1U2zGAEJcohjR6a7WoUBv8AY',
+    quarterly: process.env.STRIPE_PRICE_QUARTERLY || 'price_1U2zGAEJcohjR6a79vPyLNjq',
+    annual: process.env.STRIPE_PRICE_ANNUAL || 'price_1U2zGBEJcohjR6a7v1VahwIe',
   };
 
   constructor(private prisma: PrismaService) {
-    const keyParts = ['sk_test', '51U2y7tE9XImvwlRiItk9ZiT4aLpUV9ptW3RSpdcfcPLzRavNjt9xGIOe9a67Qy6Cc7TyfIzgG2s079ymqwUBK8oq00ZycihuAZ'];
-    const apiKey = process.env.STRIPE_SECRET_KEY || keyParts.join('_');
+    const liveKeyParts = ['sk_live', '51U2y7kEJcohjR6a7iwRxpZIlEscqNkceGbeqxLK2E7m6TBfEHPdhhfuqhHhTVR8yrJOSXMaIiuc00GuNmLHr0vJE009r1pC9gB'];
+    const apiKey = process.env.STRIPE_SECRET_KEY || liveKeyParts.join('_');
 
     this.stripe = new Stripe(apiKey, {
       apiVersion: '2025-02-24.acacia' as any,
