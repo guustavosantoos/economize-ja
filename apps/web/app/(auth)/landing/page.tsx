@@ -38,7 +38,6 @@ function SectionHeading({
 /* ─── Header ─── */
 function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { theme, toggleTheme } = useThemeStore();
   const navLinks = [
     { href: '#recursos', label: 'Recursos' },
     { href: '#telegram', label: 'Telegram' },
@@ -47,11 +46,11 @@ function SiteHeader() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/85 dark:bg-[#090d12]/85 backdrop-blur-md transition-colors">
+    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur-md transition-colors">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16 gap-3">
         {/* Logo */}
-        <a href="#topo" className="flex items-center gap-2.5 font-black text-base sm:text-lg text-slate-900 dark:text-white transition-opacity hover:opacity-90">
-          <div className="w-9 h-9 rounded-xl bg-emerald-500/10 dark:bg-emerald-400/10 border border-emerald-500/20 dark:border-emerald-400/20 flex items-center justify-center p-0.5 shadow-xs overflow-hidden">
+        <a href="#topo" className="flex items-center gap-2.5 font-black text-base sm:text-lg text-slate-900 transition-opacity hover:opacity-90">
+          <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center p-0.5 shadow-xs overflow-hidden">
             <Image
               src="/logo.png"
               alt="Economize Já Logo"
@@ -60,8 +59,8 @@ function SiteHeader() {
               className="object-contain w-full h-full"
             />
           </div>
-          <span className="tracking-tight font-extrabold text-slate-900 dark:text-white">
-            Economize <span className="text-emerald-600 dark:text-emerald-400 font-extrabold">Já</span>
+          <span className="tracking-tight font-extrabold text-slate-900">
+            Economize <span className="text-emerald-600 font-extrabold">Já</span>
           </span>
         </a>
 
@@ -71,7 +70,7 @@ function SiteHeader() {
             <a
               key={l.href}
               href={l.href}
-              className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+              className="text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-emerald-600 transition-colors"
             >
               {l.label}
             </a>
@@ -79,22 +78,10 @@ function SiteHeader() {
         </nav>
 
         {/* Actions */}
-        <div className="flex items-center gap-2">
-          {/* Theme Toggle Button */}
-          <button
-            onClick={toggleTheme}
-            type="button"
-            className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/60 flex items-center justify-center text-amber-500 hover:scale-105 active:scale-95 transition-all shadow-xs"
-            title="Alternar Tema (Claro / Escuro)"
-          >
-            <span className="material-symbols-outlined text-lg select-none">
-              {theme === 'dark' ? 'dark_mode' : 'light_mode'}
-            </span>
-          </button>
-
+        <div className="flex items-center gap-2.5">
           <Link
             href="/login"
-            className="hidden sm:inline-flex text-xs font-bold px-3.5 py-2 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="hidden sm:inline-flex text-xs font-bold px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors"
           >
             Entrar
           </Link>
@@ -106,7 +93,7 @@ function SiteHeader() {
             Criar conta grátis
           </Link>
 
-          {/* Mobile CTA (Compact, 1 line, no text wrapping!) */}
+          {/* Mobile CTA (Compact, 1 line) */}
           <Link
             href="/register"
             className="sm:hidden text-xs font-bold px-3 py-1.5 rounded-lg bg-emerald-600 text-white shadow-xs whitespace-nowrap"
@@ -116,7 +103,7 @@ function SiteHeader() {
 
           {/* Mobile menu toggle */}
           <button
-            className="md:hidden w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/60 flex items-center justify-center text-slate-800 dark:text-slate-100"
+            className="md:hidden w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-800"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Menu"
           >
@@ -129,28 +116,28 @@ function SiteHeader() {
 
       {/* Mobile menu drawer */}
       {menuOpen && (
-        <div className="md:hidden border-t border-slate-200 dark:border-slate-800 px-5 py-4 flex flex-col gap-3 bg-white/95 dark:bg-[#090d12]/95 backdrop-blur-md">
+        <div className="md:hidden border-t border-slate-200 px-5 py-4 flex flex-col gap-3 bg-white backdrop-blur-md">
           {navLinks.map((l) => (
             <a
               key={l.href}
               href={l.href}
-              className="text-sm font-semibold py-2 px-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="text-sm font-semibold py-2 px-3 rounded-lg text-slate-700 hover:bg-slate-100 transition-colors"
               onClick={() => setMenuOpen(false)}
             >
               {l.label}
             </a>
           ))}
-          <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800 flex flex-col gap-2">
+          <div className="pt-2 border-t border-slate-200 flex flex-col gap-2">
             <Link
               href="/login"
-              className="w-full text-center text-xs font-bold py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100"
+              className="w-full text-center text-xs font-bold py-2.5 rounded-xl border border-slate-200 text-slate-800 hover:bg-slate-50"
               onClick={() => setMenuOpen(false)}
             >
               Entrar na Conta
             </Link>
             <Link
               href="/register"
-              className="w-full text-center text-xs font-bold py-2.5 rounded-xl bg-emerald-600 text-white shadow-xs"
+              className="w-full text-center text-xs font-bold py-2.5 rounded-xl bg-emerald-600 text-white shadow-xs hover:bg-emerald-700"
               onClick={() => setMenuOpen(false)}
             >
               Criar Conta Grátis
