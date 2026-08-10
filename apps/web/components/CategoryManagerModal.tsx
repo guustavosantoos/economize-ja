@@ -41,6 +41,10 @@ const POPULAR_ICONS = [
   'attach_money',
   'category',
   'smart_toy',
+  'phone_iphone',
+  'subscriptions',
+  'spa',
+  'sports_esports',
 ];
 
 const PRESET_COLORS = [
@@ -195,103 +199,143 @@ export default function CategoryManagerModal({
   const filteredCategories = localCategories.filter((c) => c.type === activeTab);
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 transition-all duration-200">
-      <div className="bg-white dark:bg-[#111720] rounded-3xl p-6 w-full max-w-lg space-y-5 border border-slate-200 dark:border-slate-800 shadow-2xl animate-in zoom-in-95 max-h-[90vh] flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 flex-shrink-0">
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-emerald-500 text-xl">category</span>
-            <h2 className="text-lg font-black text-slate-900 dark:text-white">Gerenciar Categorias</h2>
+    <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-6 transition-all duration-200">
+      <div className="bg-white dark:bg-[#0f172a] rounded-3xl p-5 sm:p-7 w-full max-w-3xl space-y-6 border border-slate-200/80 dark:border-slate-800 shadow-2xl animate-in zoom-in-95 max-h-[90vh] flex flex-col">
+        
+        {/* ── Top Header ── */}
+        <div className="flex items-start justify-between border-b border-slate-100 dark:border-slate-800/80 pb-4 flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
+              <span className="material-symbols-outlined text-xl">category</span>
+            </div>
+            <div>
+              <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                Gerenciar Categorias
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                Crie, edite e escolha quais categorias exibir no seu painel.
+              </p>
+            </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+            title="Fechar Modal"
           >
-            <span className="material-symbols-outlined text-lg">close</span>
+            <span className="material-symbols-outlined text-xl">close</span>
           </button>
         </div>
 
-        {/* Formulário de Criar/Editar */}
+        {/* ── Formulário de Criar / Editar Categoria ── */}
         {isCreating || editingCategory ? (
-          <form onSubmit={handleSave} className="space-y-4 overflow-y-auto pr-1 flex-1">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-black uppercase text-slate-900 dark:text-white tracking-wider">
+          <form onSubmit={handleSave} className="space-y-5 overflow-y-auto pr-1 flex-1">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-3">
+              <span className="text-xs font-black uppercase text-emerald-600 dark:text-emerald-400 tracking-wider bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-500/20">
                 {editingCategory ? 'Editar Categoria' : 'Nova Categoria'}
-              </h3>
+              </span>
               <button
                 type="button"
                 onClick={() => {
                   setIsCreating(false);
                   setEditingCategory(null);
                 }}
-                className="text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-1"
               >
+                <span className="material-symbols-outlined text-base">arrow_back</span>
                 Voltar à lista
               </button>
             </div>
 
             {error && (
-              <p className="text-xs font-bold text-rose-500 bg-rose-50 dark:bg-rose-950/40 p-2.5 rounded-xl border border-rose-200 dark:border-rose-900">
+              <p className="text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 p-3 rounded-2xl border border-rose-200 dark:border-rose-900/60">
                 {error}
               </p>
             )}
 
-            {/* Nome */}
-            <div>
-              <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300 block mb-1">
-                Nome da Categoria
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="Ex: Assinaturas, Mercado, Pet Shop"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-bold outline-none focus:border-emerald-500"
-              />
-            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Nome da Categoria */}
+              <div className="sm:col-span-2">
+                <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300 block mb-1.5">
+                  Nome da Categoria
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ex: Assinaturas, Mercado, Pet Shop"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full h-12 px-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm font-bold outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                />
+              </div>
 
-            {/* Tipo */}
-            <div>
-              <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300 block mb-1">Tipo</label>
-              <div className="grid grid-cols-2 gap-2">
+              {/* Tipo (Despesa vs Receita) */}
+              <div>
+                <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300 block mb-1.5">Tipo</label>
+                <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 dark:bg-slate-900 rounded-2xl border border-slate-200/60 dark:border-slate-800">
+                  <button
+                    type="button"
+                    onClick={() => setType('expense')}
+                    className={`py-2.5 rounded-xl text-xs font-extrabold transition-all ${
+                      type === 'expense'
+                        ? 'bg-rose-500 text-white shadow-xs'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                  >
+                    Despesa
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setType('income')}
+                    className={`py-2.5 rounded-xl text-xs font-extrabold transition-all ${
+                      type === 'income'
+                        ? 'bg-emerald-600 text-white shadow-xs'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                  >
+                    Receita
+                  </button>
+                </div>
+              </div>
+
+              {/* Exibir no Dashboard Toggle */}
+              <div>
+                <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300 block mb-1.5">
+                  Exibir no Dashboard
+                </label>
                 <button
                   type="button"
-                  onClick={() => setType('expense')}
-                  className={`py-2 rounded-xl text-xs font-extrabold transition-all ${
-                    type === 'expense'
-                      ? 'bg-rose-500 text-white shadow-xs'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                  onClick={() => setShowInDashboard(!showInDashboard)}
+                  className={`w-full h-11 px-4 rounded-2xl border flex items-center justify-between text-xs font-bold transition-all ${
+                    showInDashboard
+                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400'
+                      : 'bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500'
                   }`}
                 >
-                  Despesa
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setType('income')}
-                  className={`py-2 rounded-xl text-xs font-extrabold transition-all ${
-                    type === 'income'
-                      ? 'bg-emerald-600 text-white shadow-xs'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                  }`}
-                >
-                  Receita
+                  <span className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-base">
+                      {showInDashboard ? 'visibility' : 'visibility_off'}
+                    </span>
+                    {showInDashboard ? 'Visível em "Onde foi seu dinheiro"' : 'Oculto do Dashboard'}
+                  </span>
+                  <span className={`w-3 h-3 rounded-full ${showInDashboard ? 'bg-emerald-500' : 'bg-slate-400'}`} />
                 </button>
               </div>
             </div>
 
             {/* Ícones Presets */}
             <div>
-              <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300 block mb-1.5">Ícone</label>
-              <div className="grid grid-cols-6 gap-2 max-h-28 overflow-y-auto p-1 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-900">
+              <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300 block mb-2">
+                Escolha o Ícone
+              </label>
+              <div className="grid grid-cols-8 sm:grid-cols-12 gap-2 p-2 border border-slate-200 dark:border-slate-800 rounded-2xl bg-slate-50 dark:bg-slate-900 max-h-32 overflow-y-auto">
                 {POPULAR_ICONS.map((i) => (
                   <button
                     key={i}
                     type="button"
                     onClick={() => setIcon(i)}
-                    className={`h-9 rounded-lg flex items-center justify-center transition-all ${
+                    className={`h-10 rounded-xl flex items-center justify-center transition-all ${
                       icon === i
-                        ? 'bg-emerald-500 text-white font-black shadow-xs ring-2 ring-emerald-400'
+                        ? 'bg-emerald-500 text-white font-black shadow-xs ring-2 ring-emerald-400 scale-105'
                         : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800'
                     }`}
                   >
@@ -303,71 +347,60 @@ export default function CategoryManagerModal({
 
             {/* Cores Presets */}
             <div>
-              <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300 block mb-1.5">Cor</label>
-              <div className="flex items-center gap-2 flex-wrap">
+              <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300 block mb-2">
+                Escolha a Cor
+              </label>
+              <div className="flex items-center gap-2.5 flex-wrap">
                 {PRESET_COLORS.map((c) => (
                   <button
                     key={c}
                     type="button"
                     onClick={() => setColor(c)}
-                    className={`w-7 h-7 rounded-full transition-all flex items-center justify-center ${
+                    className={`w-8 h-8 rounded-2xl transition-all flex items-center justify-center shadow-2xs ${
                       color === c ? 'ring-2 ring-slate-900 dark:ring-white scale-110' : 'hover:scale-105'
                     }`}
                     style={{ backgroundColor: c }}
                   >
-                    {color === c && <span className="material-symbols-outlined text-white text-xs">check</span>}
+                    {color === c && <span className="material-symbols-outlined text-white text-sm font-black">check</span>}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Opção Exibir no Dashboard */}
-            <div className="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between">
-              <div>
-                <p className="text-xs font-extrabold text-slate-900 dark:text-white">Exibir em "Onde foi seu dinheiro"</p>
-                <p className="text-[11px] text-slate-500">Mostra o card desta categoria no Dashboard principal.</p>
-              </div>
-              <input
-                type="checkbox"
-                checked={showInDashboard}
-                onChange={(e) => setShowInDashboard(e.target.checked)}
-                className="w-5 h-5 accent-emerald-500 rounded cursor-pointer"
-              />
-            </div>
-
             {/* Ações */}
-            <div className="pt-2 flex items-center gap-3">
+            <div className="pt-3 flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => {
                   setIsCreating(false);
                   setEditingCategory(null);
                 }}
-                className="flex-1 h-11 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                className="flex-1 h-12 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs font-extrabold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                className="flex-1 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-xs transition-all"
+                className="flex-1 h-12 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-md transition-all hover:scale-[1.01] active:scale-95"
               >
                 {saving ? 'Salvar...' : 'Salvar Categoria'}
               </button>
             </div>
           </form>
         ) : (
-          /* Lista de Categorias com Abas Despesa / Receita */
+          /* ── Lista de Categorias com Visual Espaçoso ── */
           <div className="space-y-4 overflow-y-auto flex-1 pr-1">
-            <div className="flex items-center justify-between">
-              <div className="bg-slate-100 dark:bg-slate-800 p-1 rounded-xl flex items-center gap-1">
+            {/* Top Toolbar (Tabs + Nova Categoria) */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-slate-50 dark:bg-slate-900/60 p-2 rounded-2xl border border-slate-200/60 dark:border-slate-800">
+              <div className="bg-slate-200/60 dark:bg-slate-800 p-1 rounded-xl flex items-center gap-1">
                 <button
                   type="button"
                   onClick={() => setActiveTab('expense')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  className={`flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-extrabold transition-all ${
                     activeTab === 'expense'
                       ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
-                      : 'text-slate-500 dark:text-slate-400'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   Despesas ({localCategories.filter((c) => c.type === 'expense').length})
@@ -375,10 +408,10 @@ export default function CategoryManagerModal({
                 <button
                   type="button"
                   onClick={() => setActiveTab('income')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  className={`flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-extrabold transition-all ${
                     activeTab === 'income'
                       ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
-                      : 'text-slate-500 dark:text-slate-400'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   Receitas ({localCategories.filter((c) => c.type === 'income').length})
@@ -388,53 +421,67 @@ export default function CategoryManagerModal({
               <button
                 type="button"
                 onClick={handleStartCreate}
-                className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1 shadow-xs transition-all"
+                className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-xs transition-all hover:scale-[1.01] active:scale-95"
               >
-                <span className="material-symbols-outlined text-sm">add</span>
+                <span className="material-symbols-outlined text-base">add</span>
                 Nova Categoria
               </button>
             </div>
 
+            {/* Listagem 2 Colunas */}
             {filteredCategories.length === 0 ? (
-              <div className="text-center py-6 space-y-2">
-                <p className="text-xs font-bold text-slate-500">Nenhuma categoria encontrada.</p>
+              <div className="text-center py-10 space-y-3">
+                <p className="text-xs font-bold text-slate-500">Nenhuma categoria cadastrada nesta aba.</p>
                 <button onClick={handleStartCreate} className="text-xs text-emerald-600 font-extrabold underline">
                   Clique aqui para criar a primeira
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {filteredCategories.map((cat) => {
                   const isVisible = cat.showInDashboard ?? true;
 
                   return (
                     <div
                       key={cat.id}
-                      className="p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 flex items-center justify-between gap-2 shadow-2xs transition-all"
+                      className="p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-slate-50/80 dark:bg-[#161f2e] hover:border-emerald-500/40 flex items-center justify-between gap-3 shadow-2xs transition-all group"
                     >
-                      <div className="flex items-center gap-3 min-w-0">
+                      {/* Ícone e Nome Completo */}
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div
-                          className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-xs"
+                          className="w-10 h-10 rounded-2xl flex items-center justify-center text-white text-sm font-bold flex-shrink-0 shadow-xs"
                           style={{ backgroundColor: cat.color || '#3b82f6' }}
                         >
-                          <span className="material-symbols-outlined text-base">{cat.icon || 'category'}</span>
+                          <span className="material-symbols-outlined text-lg">{cat.icon || 'category'}</span>
                         </div>
-                        <div className="min-w-0">
-                          <span className="text-xs font-extrabold text-slate-900 dark:text-white block truncate">
+                        <div className="min-w-0 flex-1">
+                          <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white leading-tight break-words pr-1">
                             {cat.name}
-                          </span>
-                          <span className="text-[10px] text-slate-400 block font-medium">
-                            {isVisible ? 'Exibida no Dashboard' : 'Oculta do Dashboard'}
-                          </span>
+                          </h4>
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <span
+                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                                isVisible
+                                  ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20'
+                                  : 'bg-slate-200/60 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-300/40 dark:border-slate-700/50'
+                              }`}
+                            >
+                              <span className="material-symbols-outlined text-[12px]">
+                                {isVisible ? 'visibility' : 'visibility_off'}
+                              </span>
+                              {isVisible ? 'No Dashboard' : 'Oculta'}
+                            </span>
+                          </div>
                         </div>
                       </div>
 
+                      {/* Botões de Ação */}
                       <div className="flex items-center gap-1 flex-shrink-0">
-                        {/* Toggle de Exibição no Dashboard */}
+                        {/* Toggle de Visibilidade no Dashboard */}
                         <button
                           type="button"
                           onClick={() => handleToggleDashboardVisibility(cat)}
-                          className={`p-1.5 rounded-lg transition-colors ${
+                          className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${
                             isVisible
                               ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20'
                               : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800'
@@ -446,18 +493,21 @@ export default function CategoryManagerModal({
                           </span>
                         </button>
 
+                        {/* Editar */}
                         <button
                           type="button"
                           onClick={() => handleStartEdit(cat)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
+                          className="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center justify-center transition-all"
                           title="Editar Categoria"
                         >
                           <span className="material-symbols-outlined text-base">edit</span>
                         </button>
+
+                        {/* Excluir */}
                         <button
                           type="button"
                           onClick={() => handleDelete(cat)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+                          className="w-8 h-8 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-center transition-all"
                           title="Excluir Categoria"
                         >
                           <span className="material-symbols-outlined text-base">delete</span>

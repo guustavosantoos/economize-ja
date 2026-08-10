@@ -513,7 +513,7 @@ export default function Dashboard() {
             </button>
           </div>
 
-          <div className="grid grid-cols-2 gap-2.5 max-h-[320px] overflow-y-auto pr-0.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[340px] overflow-y-auto pr-0.5">
             {allUserCategories.filter((c) => c.type === 'expense' && (c.showInDashboard ?? true)).length > 0
               ? allUserCategories
                   .filter((c) => c.type === 'expense' && (c.showInDashboard ?? true))
@@ -526,17 +526,17 @@ export default function Dashboard() {
                     return (
                       <div
                         key={cat.id || cat.name}
-                        className="bg-surface-container/30 dark:bg-[#1a2234] p-2.5 sm:p-3 rounded-xl border border-surface-variant/40 dark:border-[#1f2937] flex items-center gap-2.5 shadow-2xs"
+                        className="bg-slate-50/70 dark:bg-[#161f2e] p-3 sm:p-3.5 rounded-2xl border border-slate-200/70 dark:border-[#1f2937] flex items-center gap-3 shadow-2xs hover:border-emerald-500/40 transition-all"
                       >
                         <div
-                          className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs flex-shrink-0"
+                          className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-xs flex-shrink-0 shadow-2xs font-bold"
                           style={{ background: cat.color || '#3b82f6' }}
                         >
-                          <span className="material-symbols-outlined text-sm">{cat.icon || 'shopping_bag'}</span>
+                          <span className="material-symbols-outlined text-base">{cat.icon || 'shopping_bag'}</span>
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="text-[11px] sm:text-xs font-bold text-on-surface truncate">{cat.name}</p>
-                          <p className="text-xs font-extrabold text-on-surface-variant dark:text-slate-300 tabular-nums mt-0.5">
+                          <p className="text-xs font-extrabold text-slate-900 dark:text-white truncate">{cat.name}</p>
+                          <p className="text-xs font-black text-slate-700 dark:text-emerald-400 tabular-nums mt-0.5">
                             {formatBRL(total)}
                           </p>
                         </div>
@@ -546,17 +546,17 @@ export default function Dashboard() {
               : categoriesData.map((catData) => (
                   <div
                     key={catData.categoryId || catData.name}
-                    className="bg-surface-container/30 dark:bg-[#1a2234] p-2.5 sm:p-3 rounded-xl border border-surface-variant/40 dark:border-[#1f2937] flex items-center gap-2.5 shadow-2xs"
+                    className="bg-slate-50/70 dark:bg-[#161f2e] p-3 sm:p-3.5 rounded-2xl border border-slate-200/70 dark:border-[#1f2937] flex items-center gap-3 shadow-2xs hover:border-emerald-500/40 transition-all"
                   >
                     <div
-                      className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs flex-shrink-0"
+                      className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-xs flex-shrink-0 shadow-2xs font-bold"
                       style={{ background: catData.color || '#3b82f6' }}
                     >
-                      <span className="material-symbols-outlined text-sm">{catData.icon || 'shopping_bag'}</span>
+                      <span className="material-symbols-outlined text-base">{catData.icon || 'shopping_bag'}</span>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[11px] sm:text-xs font-bold text-on-surface truncate">{catData.name}</p>
-                      <p className="text-xs font-extrabold text-on-surface-variant dark:text-slate-300 tabular-nums mt-0.5">
+                      <p className="text-xs font-extrabold text-slate-900 dark:text-white truncate">{catData.name}</p>
+                      <p className="text-xs font-black text-slate-700 dark:text-emerald-400 tabular-nums mt-0.5">
                         {formatBRL(catData.total)}
                       </p>
                     </div>
