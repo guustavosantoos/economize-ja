@@ -1,10 +1,18 @@
 export function getApiUrl(): string {
   if (process.env.NEXT_PUBLIC_API_URL) {
-    return process.env.NEXT_PUBLIC_API_URL;
+    let url = process.env.NEXT_PUBLIC_API_URL;
+    if (url.endsWith('/')) url = url.slice(0, -1);
+    if (!url.endsWith('/api/v1')) url += '/api/v1';
+    return url;
   }
   if (typeof window !== 'undefined') {
+    const protocol = window.location.protocol;
     const hostname = window.location.hostname;
-    return `http://${hostname}:3001/api/v1`;
+
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return `${protocol}//${hostname}:3001/api/v1`;
+    }
+    return `${protocol}//${hostname}/api/v1`;
   }
   return 'http://localhost:3001/api/v1';
 }
