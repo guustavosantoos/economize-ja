@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { apiClient } from '../../../../lib/api-client';
+import { useAuthStore } from '../../../../stores/auth.store';
 
 type Category = {
   id: string;
@@ -51,10 +52,12 @@ function NewTransactionForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const paramDate = searchParams.get('date');
+  const { user } = useAuthStore();
 
   const [type, setType] = useState<'expense' | 'income' | 'transfer'>('expense');
   const [paymentMethod, setPaymentMethod] = useState<'debit' | 'credit'>('debit');
   const [installmentsCount, setInstallmentsCount] = useState<number>(1);
+  const [showProModal, setShowProModal] = useState(false);
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [categoryId, setCategoryId] = useState('');
@@ -384,7 +387,15 @@ function NewTransactionForm() {
                   <div className="relative">
                     <select
                       value={installmentsCount}
-                      onChange={(e) => setInstallmentsCount(Number(e.target.value))}
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        if (val > 1 && user?.plan !== 'pro') {
+                          setShowProModal(true);
+                          setInstallmentsCount(1);
+                        } else {
+                          setInstallmentsCount(val);
+                        }
+                      }}
                       className="w-full p-3.5 rounded-xl border border-surface-variant dark:border-[#253346] bg-white dark:bg-[#151d27] text-on-surface font-bold text-xs focus:outline-none focus:border-primary appearance-none pr-10"
                     >
                       <option value={1}>1x - À vista (R$ {amount || '0,00'})</option>
@@ -560,6 +571,44 @@ function NewTransactionForm() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Upgrade PRO para Parcelamento */}
+      {showProModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#111720] rounded-3xl p-6 w-full max-w-md space-y-4 border border-slate-200 dark:border-slate-800 text-center shadow-2xl">
+            <div className="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/20 flex items-center justify-center mx-auto">
+              <span className="material-symbols-outlined text-2xl">workspace_premium</span>
+            </div>
+
+            <div className="space-y-1">
+              <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full">
+                Recurso do Plano PRO
+              </span>
+              <h3 className="text-xl font-black text-slate-900 dark:text-white">
+                Compras Parceladas no Cartão
+              </h3>
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                O parcelamento de 2x a 24x com lançamento automático de faturas mês a mês é um recurso exclusivo para assinantes do <strong>Plano PRO</strong>.
+              </p>
+            </div>
+
+            <div className="pt-2 flex flex-col gap-2">
+              <button
+                onClick={() => router.push('/pro')}
+                className="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-md transition-all"
+              >
+                Conhecer o Plano PRO por R$ 9,74/mês
+              </button>
+              <button
+                onClick={() => setShowProModal(false)}
+                className="w-full py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-700 dark:text-slate-400"
+              >
+                Continuar no Plano Free (À Vista)
+              </button>
+            </div>
           </div>
         </div>
       )}

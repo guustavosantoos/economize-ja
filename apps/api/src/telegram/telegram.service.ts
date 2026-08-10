@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as crypto from 'crypto';
 import { AuditService } from '../audit/audit.service';
@@ -197,6 +197,15 @@ export class TelegramService {
     const paymentMethod = dto.paymentMethod || (installmentsCount > 1 ? 'credit' : 'debit');
 
     if (installmentsCount > 1) {
+      const user = await this.prisma.user.findUnique({
+        where: { id: link.userId },
+        select: { plan: true },
+      });
+
+      if (user?.plan !== 'pro') {
+        throw new ForbiddenException('🔒 O parcelamento de compras (ex: 5x, 10x) é um recurso exclusivo do Plano PRO. Acesse economizeja.com.br/pro para fazer o upgrade!');
+      }
+
       const installmentGroup = crypto.randomUUID();
       const baseDate = new Date(dto.date);
       const baseDescription = dto.description || 'Compra Parcelada';

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
@@ -14,6 +14,15 @@ export class TransactionsService {
     const paymentMethod = dto.paymentMethod || (installmentsCount > 1 ? 'credit' : 'debit');
 
     if (installmentsCount > 1) {
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { plan: true },
+      });
+
+      if (user?.plan !== 'pro') {
+        throw new ForbiddenException('O recurso de compras parceladas (ex: 2x a 24x) é exclusivo para assinantes do Plano PRO. Acesse /pro para fazer o upgrade!');
+      }
+
       const installmentGroup = crypto.randomUUID();
       const baseDate = new Date(dto.date);
       const baseDescription = dto.description || 'Compra Parcelada';

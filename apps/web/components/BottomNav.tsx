@@ -10,6 +10,7 @@ import Image from 'next/image';
 const navItems = [
   { href: '/dashboard', icon: 'dashboard', label: 'Dashboard', dataCy: 'nav-dashboard-link' },
   { href: '/transactions', icon: 'receipt_long', label: 'Transações', dataCy: 'nav-transactions-link' },
+  { href: '/bills', icon: 'notifications_active', label: 'Lembretes', dataCy: 'nav-bills-link' },
   { href: '/settings/telegram', icon: 'send', label: 'Telegram', dataCy: 'nav-telegram-link' },
   { href: '/settings', icon: 'person', label: 'Perfil', dataCy: 'nav-profile-link' },
 ];

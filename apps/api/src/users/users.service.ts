@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuditService } from '../audit/audit.service';
@@ -26,6 +26,15 @@ export class UsersService {
   }
 
   async update(userId: string, dto: UpdateUserDto) {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { plan: true },
+    });
+
+    if (dto.creditCardLimit !== undefined && dto.creditCardLimit > 0 && existingUser?.plan !== 'pro') {
+      throw new ForbiddenException('A definição de meta/limite do cartão de crédito é um recurso exclusivo do Plano PRO. Acesse /pro para fazer o upgrade!');
+    }
+
     const dataToUpdate: any = {};
     if (dto.name !== undefined) dataToUpdate.name = dto.name;
     if (dto.creditCardLimit !== undefined) dataToUpdate.creditCardLimit = dto.creditCardLimit;
