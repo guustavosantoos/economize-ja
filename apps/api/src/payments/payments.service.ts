@@ -8,9 +8,9 @@ export class PaymentsService {
   private readonly logger = new Logger(PaymentsService.name);
 
   private readonly priceIds = {
-    monthly: process.env.STRIPE_PRICE_MONTHLY || 'price_1U2yR2E9XImvwlRip6awmtC2',
-    quarterly: process.env.STRIPE_PRICE_QUARTERLY || 'price_1U2yR2E9XImvwlRi0bwoCY4U',
-    annual: process.env.STRIPE_PRICE_ANNUAL || 'price_1U2yR3E9XImvwlRiRaQkNqzg',
+    monthly: process.env.STRIPE_PRICE_MONTHLY || 'price_1U2z4lE9XImvwlRiJmNOfeOa',
+    quarterly: process.env.STRIPE_PRICE_QUARTERLY || 'price_1U2z4mE9XImvwlRiBZ4BA0Uc',
+    annual: process.env.STRIPE_PRICE_ANNUAL || 'price_1U2z4nE9XImvwlRiuRC8sjSs',
   };
 
   constructor(private prisma: PrismaService) {
