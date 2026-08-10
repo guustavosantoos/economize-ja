@@ -4,10 +4,15 @@ import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { FilterTransactionDto } from './dto/filter-transaction.dto';
 import { AuditService } from '../audit/audit.service';
+import { DashboardService } from '../dashboard/dashboard.service';
 
 @Injectable()
 export class TransactionsService {
-  constructor(private prisma: PrismaService, private audit: AuditService) {}
+  constructor(
+    private prisma: PrismaService,
+    private audit: AuditService,
+    private dashboardService: DashboardService,
+  ) {}
 
   async create(userId: string, dto: CreateTransactionDto) {
     const installmentsCount = dto.installmentsCount && dto.installmentsCount > 1 ? Number(dto.installmentsCount) : 1;
@@ -50,13 +55,15 @@ export class TransactionsService {
         data: transactionsData,
       });
 
+      this.dashboardService.clearUserCache(userId);
+
       return this.prisma.transaction.findFirst({
         where: { userId, installmentGroup, installmentNumber: 1 },
         include: { category: true },
       });
     }
 
-    return this.prisma.transaction.create({
+    const created = await this.prisma.transaction.create({
       data: {
         userId,
         type: dto.type,
@@ -69,6 +76,9 @@ export class TransactionsService {
         description: dto.description,
       },
     });
+
+    this.dashboardService.clearUserCache(userId);
+    return created;
   }
 
   findAll(userId: string, filter: FilterTransactionDto) {
@@ -78,7 +88,6 @@ export class TransactionsService {
       if (filter.startDate) where.date.gte = new Date(filter.startDate);
       if (filter.endDate) where.date.lte = new Date(filter.endDate);
     }
-    // Sort by createdAt desc so the most recently added transaction always appears first
     return this.prisma.transaction.findMany({
       where,
       orderBy: { createdAt: 'desc' },
@@ -90,21 +99,25 @@ export class TransactionsService {
     return this.prisma.transaction.findFirst({ where: { id, userId, deletedAt: null } });
   }
 
-  update(userId: string, id: string, dto: UpdateTransactionDto) {
+  async update(userId: string, id: string, dto: UpdateTransactionDto) {
     const data: any = { ...dto };
     if (dto.date) data.date = new Date(dto.date);
-    return this.prisma.transaction.updateMany({
+    const updated = await this.prisma.transaction.updateMany({
       where: { id, userId },
       data,
     });
+    this.dashboardService.clearUserCache(userId);
+    return updated;
   }
 
   async remove(userId: string, id: string, req: any) {
     await this.audit.log(userId, 'transaction_delete', req, { transactionId: id });
-    return this.prisma.transaction.updateMany({
+    const res = await this.prisma.transaction.updateMany({
       where: { id, userId },
       data: { deletedAt: new Date() },
     });
+    this.dashboardService.clearUserCache(userId);
+    return res;
   }
 
   async resetTransactions(userId: string, req?: any) {
@@ -115,6 +128,7 @@ export class TransactionsService {
       where: { userId, deletedAt: null },
       data: { deletedAt: new Date() },
     });
+    this.dashboardService.clearUserCache(userId);
     return { success: true, resetCount: count.count };
   }
 }

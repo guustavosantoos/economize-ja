@@ -3,9 +3,26 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class DashboardService {
+  private cache = new Map<string, { data: any; expiresAt: number }>();
+  private readonly TTL_MS = 15000; // 15 segundos de cache ultra-rápido em memória
+
   constructor(private prisma: PrismaService) {}
 
+  public clearUserCache(userId: string) {
+    for (const key of this.cache.keys()) {
+      if (key.startsWith(userId)) {
+        this.cache.delete(key);
+      }
+    }
+  }
+
   async getSummary(userId: string, yearMonth?: string) {
+    const cacheKey = `${userId}:summary:${yearMonth || 'current'}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.data;
+    }
+
     const now = new Date();
     let year = now.getFullYear();
     let month = now.getMonth(); // 0-11
@@ -100,7 +117,7 @@ export class DashboardService {
       else cardStatus = 'ok';
     }
 
-    return {
+    const result = {
       currentBalance,
       totalIncome,
       totalExpense,
@@ -116,9 +133,18 @@ export class DashboardService {
         status: cardStatus,
       },
     };
+
+    this.cache.set(cacheKey, { data: result, expiresAt: Date.now() + this.TTL_MS });
+    return result;
   }
 
   async getCalendar(userId: string, yearMonth?: string) {
+    const cacheKey = `${userId}:calendar:${yearMonth || 'current'}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.data;
+    }
+
     const now = new Date();
     let year = now.getFullYear();
     let month = now.getMonth(); // 0-11
@@ -184,15 +210,24 @@ export class DashboardService {
       }
     });
 
-    return {
+    const result = {
       year,
       month: month + 1,
       yearMonth: `${year}-${String(month + 1).padStart(2, '0')}`,
       days: Object.values(daysMap),
     };
+
+    this.cache.set(cacheKey, { data: result, expiresAt: Date.now() + this.TTL_MS });
+    return result;
   }
 
   async getByCategory(userId: string, yearMonth?: string) {
+    const cacheKey = `${userId}:category:${yearMonth || 'current'}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.data;
+    }
+
     const where: any = { userId, deletedAt: null, type: 'expense' };
 
     if (yearMonth && /^\d{4}-\d{2}$/.test(yearMonth)) {
@@ -224,13 +259,22 @@ export class DashboardService {
       totalAll += amt;
     });
 
-    return Object.values(groups).map((g) => ({
+    const result = Object.values(groups).map((g) => ({
       ...g,
       percentage: totalAll > 0 ? Math.round((g.total / totalAll) * 100) : 0,
     }));
+
+    this.cache.set(cacheKey, { data: result, expiresAt: Date.now() + this.TTL_MS });
+    return result;
   }
 
   async getMonthlyEvolution(userId: string) {
+    const cacheKey = `${userId}:evolution`;
+    const cached = this.cache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.data;
+    }
+
     const now = new Date();
     const startDate = new Date(now.getFullYear(), now.getMonth() - 5, 1);
 
@@ -243,7 +287,6 @@ export class DashboardService {
       orderBy: { date: 'asc' },
     });
 
-    // Mapeia os últimos 6 meses
     const monthsMap: Record<string, { month: string; income: number; expense: number; balance: number }> = {};
 
     for (let i = 5; i >= 0; i--) {
@@ -265,6 +308,8 @@ export class DashboardService {
       }
     });
 
-    return Object.values(monthsMap);
+    const result = Object.values(monthsMap);
+    this.cache.set(cacheKey, { data: result, expiresAt: Date.now() + this.TTL_MS });
+    return result;
   }
 }
