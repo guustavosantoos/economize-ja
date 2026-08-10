@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { apiClient } from '../../../lib/api-client';
 import TransactionItem from '../../../components/TransactionItem';
 import PwaInstallPrompt from '../../../components/PwaInstallPrompt';
+import CategoryManagerModal from '../../../components/CategoryManagerModal';
 import { useThemeStore } from '../../../stores/theme.store';
 import { useAuthStore } from '../../../stores/auth.store';
 import {
@@ -98,6 +99,8 @@ export default function Dashboard() {
   }, []);
   const [summary, setSummary] = useState<Summary | null>(null);
   const [categoriesData, setCategoriesData] = useState<CategoryData[]>([]);
+  const [allUserCategories, setAllUserCategories] = useState<any[]>([]);
+  const [showCategoryManager, setShowCategoryManager] = useState(false);
   const [evolutionData, setEvolutionData] = useState<EvolutionData[]>([]);
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
   const [calendarData, setCalendarData] = useState<CalendarData | null>(null);
@@ -131,12 +134,13 @@ export default function Dashboard() {
         const startDate = `${calendarMonth}-01`;
         const endDate = `${calendarMonth}-${String(lastDay).padStart(2, '0')}`;
 
-        const [sumRes, catRes, evoRes, txRes, calRes] = await Promise.allSettled([
+        const [sumRes, catRes, evoRes, txRes, calRes, allCatRes] = await Promise.allSettled([
           apiClient.get(`/dashboard/summary?month=${calendarMonth}`),
           apiClient.get(`/dashboard/by-category?month=${calendarMonth}`),
           apiClient.get('/dashboard/monthly-evolution'),
           apiClient.get(`/transactions?startDate=${startDate}&endDate=${endDate}`),
           apiClient.get(`/dashboard/calendar?month=${calendarMonth}`),
+          apiClient.get('/categories'),
         ]);
 
         if (sumRes.status === 'fulfilled' && sumRes.value) setSummary(sumRes.value);
@@ -144,6 +148,7 @@ export default function Dashboard() {
         if (evoRes.status === 'fulfilled' && Array.isArray(evoRes.value)) setEvolutionData(evoRes.value);
         if (txRes.status === 'fulfilled' && Array.isArray(txRes.value)) setRecentTransactions(txRes.value.slice(0, 5));
         if (calRes.status === 'fulfilled' && calRes.value) setCalendarData(calRes.value);
+        if (allCatRes.status === 'fulfilled' && Array.isArray(allCatRes.value)) setAllUserCategories(allCatRes.value);
       } catch (err) {
         console.error('Error loading dashboard:', err);
       } finally {
@@ -500,35 +505,63 @@ export default function Dashboard() {
               <span className="material-symbols-outlined text-secondary dark:text-[#34d399] text-lg">category</span>
               <h3 className="font-extrabold text-on-surface text-base">Onde foi seu dinheiro</h3>
             </div>
-            <Link href="/transactions" className="text-xs text-primary dark:text-[#34d399] font-bold hover:underline flex items-center gap-1">
+            <button
+              onClick={() => setShowCategoryManager(true)}
+              className="text-xs text-primary dark:text-[#34d399] font-bold hover:underline flex items-center gap-1 cursor-pointer"
+            >
               <span className="material-symbols-outlined text-sm">edit</span> Editar
-            </Link>
+            </button>
           </div>
 
-          <div className="grid grid-cols-2 gap-2.5">
-            {BASE_CATEGORIES.map((baseCat) => {
-              const total = getCategoryTotal(baseCat);
+          <div className="grid grid-cols-2 gap-2.5 max-h-[320px] overflow-y-auto pr-0.5">
+            {allUserCategories.filter((c) => c.type === 'expense').length > 0
+              ? allUserCategories
+                  .filter((c) => c.type === 'expense')
+                  .map((cat) => {
+                    const spentData = categoriesData.find(
+                      (cd) => cd.categoryId === cat.id || cd.name.toLowerCase() === cat.name.toLowerCase()
+                    );
+                    const total = spentData ? Number(spentData.total) : 0;
 
-              return (
-                <div
-                  key={baseCat.name}
-                  className="bg-surface-container/30 dark:bg-[#1a2234] p-2.5 sm:p-3 rounded-xl border border-surface-variant/40 dark:border-[#1f2937] flex items-center gap-2.5"
-                >
+                    return (
+                      <div
+                        key={cat.id || cat.name}
+                        className="bg-surface-container/30 dark:bg-[#1a2234] p-2.5 sm:p-3 rounded-xl border border-surface-variant/40 dark:border-[#1f2937] flex items-center gap-2.5 shadow-2xs"
+                      >
+                        <div
+                          className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs flex-shrink-0"
+                          style={{ background: cat.color || '#3b82f6' }}
+                        >
+                          <span className="material-symbols-outlined text-sm">{cat.icon || 'shopping_bag'}</span>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[11px] sm:text-xs font-bold text-on-surface truncate">{cat.name}</p>
+                          <p className="text-xs font-extrabold text-on-surface-variant dark:text-slate-300 tabular-nums mt-0.5">
+                            {formatBRL(total)}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })
+              : categoriesData.map((catData) => (
                   <div
-                    className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs flex-shrink-0"
-                    style={{ background: baseCat.color }}
+                    key={catData.categoryId || catData.name}
+                    className="bg-surface-container/30 dark:bg-[#1a2234] p-2.5 sm:p-3 rounded-xl border border-surface-variant/40 dark:border-[#1f2937] flex items-center gap-2.5 shadow-2xs"
                   >
-                    <span className="material-symbols-outlined text-sm">{baseCat.icon}</span>
+                    <div
+                      className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs flex-shrink-0"
+                      style={{ background: catData.color || '#3b82f6' }}
+                    >
+                      <span className="material-symbols-outlined text-sm">{catData.icon || 'shopping_bag'}</span>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[11px] sm:text-xs font-bold text-on-surface truncate">{catData.name}</p>
+                      <p className="text-xs font-extrabold text-on-surface-variant dark:text-slate-300 tabular-nums mt-0.5">
+                        {formatBRL(catData.total)}
+                      </p>
+                    </div>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[11px] sm:text-xs font-bold text-on-surface truncate">{baseCat.name}</p>
-                    <p className="text-xs font-extrabold text-on-surface-variant dark:text-slate-300 tabular-nums mt-0.5">
-                      {formatBRL(total)}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
+                ))}
           </div>
         </div>
       </div>
@@ -671,6 +704,24 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* Modal de Gerenciamento de Categorias */}
+      <CategoryManagerModal
+        isOpen={showCategoryManager}
+        onClose={() => setShowCategoryManager(false)}
+        onCategoriesChanged={() => {
+          const [yearStr, monthStr] = calendarMonth.split('-');
+          const lastDay = new Date(Number(yearStr), Number(monthStr), 0).getDate();
+          const startDate = `${calendarMonth}-01`;
+          const endDate = `${calendarMonth}-${String(lastDay).padStart(2, '0')}`;
+          apiClient.get(`/dashboard/by-category?month=${calendarMonth}`).then((res) => {
+            if (Array.isArray(res)) setCategoriesData(res);
+          });
+          apiClient.get('/categories').then((res) => {
+            if (Array.isArray(res)) setAllUserCategories(res);
+          });
+        }}
+      />
     </div>
   );
 }

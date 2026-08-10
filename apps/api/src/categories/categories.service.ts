@@ -67,14 +67,14 @@ export class CategoriesService {
 
   async update(userId: string, id: string, dto: UpdateCategoryDto) {
     return this.prisma.category.updateMany({
-      where: { id, userId },
+      where: { id, OR: [{ userId }, { isDefault: true }] },
       data: dto,
     });
   }
 
   async remove(userId: string, id: string) {
     return this.prisma.category.deleteMany({
-      where: { id, userId },
+      where: { id, OR: [{ userId }, { isDefault: true }] },
     });
   }
 }
