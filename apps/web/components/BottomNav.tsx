@@ -45,19 +45,21 @@ export default function BottomNav() {
         }`}
       >
         {/* Logo + Botão Colapsar */}
-        <div className="p-4 border-b border-surface-variant dark:border-[#1f2937] flex items-center justify-between">
+        <div className="p-4 border-b border-slate-200/80 dark:border-slate-800/80 flex items-center justify-between">
           <div className="flex items-center gap-3 overflow-hidden">
-            <Image
-              src="/logo.png"
-              alt="Economize Já Logo"
-              width={40}
-              height={40}
-              className="rounded-xl object-contain w-10 h-10 border border-surface-variant dark:border-[#1f2937] bg-white p-0.5 flex-shrink-0"
-            />
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 dark:bg-emerald-400/10 border border-emerald-500/20 dark:border-emerald-400/20 flex items-center justify-center p-0.5 shadow-xs flex-shrink-0 overflow-hidden">
+              <Image
+                src="/logo.png"
+                alt="Economize Já Logo"
+                width={36}
+                height={36}
+                className="object-contain w-full h-full"
+              />
+            </div>
             {!sidebarCollapsed && (
               <div className="truncate">
-                <p className="font-extrabold text-on-surface text-sm leading-tight truncate">Economize Já</p>
-                <p className="text-[10px] text-outline font-medium truncate">Controle Financeiro</p>
+                <p className="font-black text-slate-900 dark:text-white text-sm leading-tight truncate">Economize <span className="text-emerald-600 dark:text-emerald-400 font-extrabold">Já</span></p>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate">Controle Financeiro</p>
               </div>
             )}
           </div>

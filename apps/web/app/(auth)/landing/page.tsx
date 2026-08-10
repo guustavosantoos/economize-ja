@@ -20,14 +20,14 @@ function SectionHeading({
 }) {
   return (
     <div className={`flex flex-col gap-3 ${center ? 'items-center text-center' : 'items-start'} max-w-2xl`}>
-      <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: '#006C49' }}>
+      <span className="text-xs font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
         {eyebrow}
       </span>
-      <h2 className="text-2xl md:text-4xl font-bold leading-tight tracking-tight" style={{ color: '#003535' }}>
+      <h2 className="text-2xl md:text-4xl font-black leading-tight tracking-tight text-slate-900 dark:text-white">
         {title}
       </h2>
       {subtitle && (
-        <p className="text-base md:text-lg leading-relaxed" style={{ color: '#404848' }}>
+        <p className="text-base md:text-lg leading-relaxed text-slate-600 dark:text-slate-300">
           {subtitle}
         </p>
       )}
@@ -47,35 +47,31 @@ function SiteHeader() {
   ];
 
   return (
-    <header
-      className="sticky top-0 z-50 border-b"
-      style={{
-        background: 'rgba(248,249,250,0.85)',
-        backdropFilter: 'saturate(180%) blur(12px)',
-        borderColor: '#E1E3E4',
-      }}
-    >
-      <div className="max-w-6xl mx-auto px-5 flex items-center justify-between h-16 gap-4">
+    <header className="sticky top-0 z-50 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/85 dark:bg-[#090d12]/85 backdrop-blur-md transition-colors">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16 gap-3">
         {/* Logo */}
-        <a href="#topo" className="flex items-center gap-2 font-bold text-lg" style={{ color: '#003535' }}>
-          <Image
-            src="/logo.png"
-            alt="Economize Já Logo"
-            width={56}
-            height={56}
-            className="rounded-2xl object-contain w-14 h-14 border border-surface-variant bg-white p-1"
-          />
-          Economize Já
+        <a href="#topo" className="flex items-center gap-2.5 font-black text-base sm:text-lg text-slate-900 dark:text-white transition-opacity hover:opacity-90">
+          <div className="w-9 h-9 rounded-xl bg-emerald-500/10 dark:bg-emerald-400/10 border border-emerald-500/20 dark:border-emerald-400/20 flex items-center justify-center p-0.5 shadow-xs overflow-hidden">
+            <Image
+              src="/logo.png"
+              alt="Economize Já Logo"
+              width={32}
+              height={32}
+              className="object-contain w-full h-full"
+            />
+          </div>
+          <span className="tracking-tight font-extrabold text-slate-900 dark:text-white">
+            Economize <span className="text-emerald-600 dark:text-emerald-400 font-extrabold">Já</span>
+          </span>
         </a>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden md:flex items-center gap-6">
           {navLinks.map((l) => (
             <a
               key={l.href}
               href={l.href}
-              className="text-sm font-medium transition-colors hover:text-primary"
-              style={{ color: '#404848' }}
+              className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
             >
               {l.label}
             </a>
@@ -88,55 +84,78 @@ function SiteHeader() {
           <button
             onClick={toggleTheme}
             type="button"
-            className="w-9 h-9 rounded-xl bg-surface-container dark:bg-[#151d27] border border-surface-variant dark:border-[#253346] flex items-center justify-center text-amber-500 hover:scale-105 transition-all shadow-xs"
+            className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/60 flex items-center justify-center text-amber-500 hover:scale-105 active:scale-95 transition-all shadow-xs"
             title="Alternar Tema (Claro / Escuro)"
           >
-            <span className="material-symbols-outlined text-lg">
+            <span className="material-symbols-outlined text-lg select-none">
               {theme === 'dark' ? 'dark_mode' : 'light_mode'}
             </span>
           </button>
 
           <Link
             href="/login"
-            className="hidden sm:inline-flex text-sm font-medium px-4 py-2 rounded-lg transition-all hover:bg-surface-container"
-            style={{ color: '#404848' }}
+            className="hidden sm:inline-flex text-xs font-bold px-3.5 py-2 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           >
             Entrar
           </Link>
+
           <Link
             href="/register"
-            className="text-sm font-semibold px-4 py-2 rounded-lg text-white transition-all hover:opacity-90 active:scale-95"
-            style={{ background: '#003535' }}
+            className="hidden sm:inline-flex text-xs font-bold px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-all hover:shadow-emerald-600/20 active:scale-95"
           >
             Criar conta grátis
           </Link>
+
+          {/* Mobile CTA (Compact, 1 line, no text wrapping!) */}
+          <Link
+            href="/register"
+            className="sm:hidden text-xs font-bold px-3 py-1.5 rounded-lg bg-emerald-600 text-white shadow-xs whitespace-nowrap"
+          >
+            Criar Conta
+          </Link>
+
           {/* Mobile menu toggle */}
           <button
-            className="md:hidden p-2 rounded-lg"
+            className="md:hidden w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/60 flex items-center justify-center text-slate-800 dark:text-slate-100"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Menu"
           >
-            <span className="material-symbols-outlined text-xl" style={{ color: '#003535', pointerEvents: 'none' }}>
+            <span className="material-symbols-outlined text-xl select-none">
               {menuOpen ? 'close' : 'menu'}
             </span>
           </button>
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile menu drawer */}
       {menuOpen && (
-        <div className="md:hidden border-t px-5 py-4 flex flex-col gap-3" style={{ borderColor: '#E1E3E4', background: '#F8F9FA' }}>
+        <div className="md:hidden border-t border-slate-200 dark:border-slate-800 px-5 py-4 flex flex-col gap-3 bg-white/95 dark:bg-[#090d12]/95 backdrop-blur-md">
           {navLinks.map((l) => (
             <a
               key={l.href}
               href={l.href}
-              className="text-sm font-medium py-2"
-              style={{ color: '#404848' }}
+              className="text-sm font-semibold py-2 px-3 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               onClick={() => setMenuOpen(false)}
             >
               {l.label}
             </a>
           ))}
+          <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800 flex flex-col gap-2">
+            <Link
+              href="/login"
+              className="w-full text-center text-xs font-bold py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100"
+              onClick={() => setMenuOpen(false)}
+            >
+              Entrar na Conta
+            </Link>
+            <Link
+              href="/register"
+              className="w-full text-center text-xs font-bold py-2.5 rounded-xl bg-emerald-600 text-white shadow-xs"
+              onClick={() => setMenuOpen(false)}
+            >
+              Criar Conta Grátis
+            </Link>
+          </div>
         </div>
       )}
     </header>

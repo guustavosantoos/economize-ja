@@ -62,14 +62,14 @@
   color-scheme: light;
 }
 
-/* ─── Dark Mode Overrides (Premium Charcoal & Teal) ─────────── */
+/* ─── Dark Mode Overrides (Premium Charcoal & Emerald/Teal) ─────────── */
 html.dark, [data-theme="dark"] {
-  --bg-main: #0d1117;
-  --bg-card: #161b22;
-  --bg-subtle: #21262d;
-  --border-card: #30363d;
-  --text-main: #e6edf3;
-  --text-muted: #8b949e;
+  --bg-main: #090d12;
+  --bg-card: #111720;
+  --bg-subtle: #19222e;
+  --border-card: #202b3c;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
   --text-primary-accent: #2dd4bf;
   color-scheme: dark;
 }
@@ -142,34 +142,34 @@ html:not(.dark) .bg-primary {
 /* ─── DARK MODE SPECIFIC STYLES ──────────────────────────────── */
 html.dark body,
 html.dark .bg-background {
-  background-color: #0d1117 !important;
-  color: #e6edf3 !important;
+  background-color: #090d12 !important;
+  color: #f1f5f9 !important;
 }
 
 html.dark .bg-white {
-  background-color: #161b22 !important;
-  color: #e6edf3 !important;
-  border-color: #30363d !important;
+  background-color: #111720 !important;
+  color: #f1f5f9 !important;
+  border-color: #202b3c !important;
 }
 
 html.dark .bg-surface-variant {
-  background-color: #21262d !important;
-  color: #c9d1d9 !important;
+  background-color: #19222e !important;
+  color: #cbd5e1 !important;
 }
 
 html.dark .bg-surface-container {
-  background-color: #1c2128 !important;
-  color: #e6edf3 !important;
+  background-color: #19222e !important;
+  color: #f1f5f9 !important;
 }
 
 html.dark input:not(.bg-transparent) {
-  background-color: #21262d !important;
-  color: #e6edf3 !important;
-  border-color: #30363d !important;
+  background-color: #19222e !important;
+  color: #f1f5f9 !important;
+  border-color: #202b3c !important;
 }
 
 html.dark input::placeholder {
-  color: #6e7681 !important;
+  color: #64748b !important;
 }
 
 html.dark .text-primary {
@@ -177,15 +177,15 @@ html.dark .text-primary {
 }
 
 html.dark .text-on-surface {
-  color: #e6edf3 !important;
+  color: #f1f5f9 !important;
 }
 
 html.dark .text-on-surface-variant {
-  color: #c9d1d9 !important;
+  color: #cbd5e1 !important;
 }
 
 html.dark .text-outline {
-  color: #8b949e !important;
+  color: #94a3b8 !important;
 }
 
 html.dark .bg-primary {
@@ -195,11 +195,11 @@ html.dark .bg-primary {
 
 html.dark .border-surface-variant,
 html.dark .border-outline-variant {
-  border-color: #30363d !important;
+  border-color: #202b3c !important;
 }
 
 html.dark .divide-surface-variant > * + * {
-  border-color: #30363d !important;
+  border-color: #202b3c !important;
 }
 
 /* ─── Custom Scrollbar for Handcrafted Feel ──────────────────── */
