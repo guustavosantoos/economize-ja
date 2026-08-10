@@ -5,10 +5,22 @@ import { PrismaService } from '../prisma/prisma.service';
 export class DashboardService {
   constructor(private prisma: PrismaService) {}
 
-  async getSummary(userId: string) {
+  async getSummary(userId: string, yearMonth?: string) {
     const now = new Date();
-    const firstDayCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const firstDayPreviousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    let year = now.getFullYear();
+    let month = now.getMonth(); // 0-11
+
+    if (yearMonth && /^\d{4}-\d{2}$/.test(yearMonth)) {
+      const [y, m] = yearMonth.split('-').map(Number);
+      year = y;
+      month = m - 1;
+    }
+
+    const firstDayCurrentMonth = new Date(year, month, 1);
+    const lastDayCurrentMonth = new Date(year, month + 1, 0, 23, 59, 59);
+
+    const firstDayPreviousMonth = new Date(year, month - 1, 1);
+    const lastDayPreviousMonth = new Date(year, month, 0, 23, 59, 59);
 
     // Buscar usuário para limite do cartão + transações
     const [user, allTxs, currentTxs, previousTxs] = await Promise.all([
@@ -20,28 +32,42 @@ export class DashboardService {
         where: { userId, deletedAt: null },
       }),
       this.prisma.transaction.findMany({
-        where: { userId, deletedAt: null, date: { gte: firstDayCurrentMonth } },
+        where: { userId, deletedAt: null, date: { gte: firstDayCurrentMonth, lte: lastDayCurrentMonth } },
       }),
       this.prisma.transaction.findMany({
-        where: { userId, deletedAt: null, date: { gte: firstDayPreviousMonth, lt: firstDayCurrentMonth } },
+        where: { userId, deletedAt: null, date: { gte: firstDayPreviousMonth, lte: lastDayPreviousMonth } },
       }),
     ]);
 
-    // Saldo acumulado histórico
+    // Saldo acumulado histórico até o mês selecionado
     let currentBalance = 0;
     allTxs.forEach((t) => {
       const amt = Number(t.amount);
-      if (t.type === 'income') currentBalance += amt;
-      else if (t.type === 'expense') currentBalance -= amt;
+      const tDate = new Date(t.date);
+      if (tDate <= lastDayCurrentMonth) {
+        if (t.type === 'income') currentBalance += amt;
+        else if (t.type === 'expense' && t.paymentMethod !== 'credit') currentBalance -= amt;
+      }
     });
 
-    // Totais do mês atual
+    // Totais do mês selecionado
     let totalIncome = 0;
     let totalExpense = 0;
+    let totalCreditExpense = 0;
+    let totalDebitExpense = 0;
+
     currentTxs.forEach((t) => {
       const amt = Number(t.amount);
-      if (t.type === 'income') totalIncome += amt;
-      else if (t.type === 'expense') totalExpense += amt;
+      if (t.type === 'income') {
+        totalIncome += amt;
+      } else if (t.type === 'expense') {
+        totalExpense += amt;
+        if (t.paymentMethod === 'credit') {
+          totalCreditExpense += amt;
+        } else {
+          totalDebitExpense += amt;
+        }
+      }
     });
 
     // Totais do mês anterior
@@ -54,7 +80,7 @@ export class DashboardService {
     });
     const previousMonthBalance = prevIncome - prevExpense;
 
-    // Calculo da porcentagem de variação
+    // Cálculo da porcentagem de variação
     let monthChangePercentage = 0;
     if (previousMonthBalance !== 0) {
       monthChangePercentage = Math.round(((totalIncome - totalExpense - previousMonthBalance) / Math.abs(previousMonthBalance)) * 100);
@@ -62,14 +88,14 @@ export class DashboardService {
       monthChangePercentage = 100;
     }
 
-    // Cálculo da Meta de Cartão de Crédito
+    // Cálculo da Meta de Cartão de Crédito para o mês selecionado
     const limit = user?.creditCardLimit ? Number(user.creditCardLimit) : 0;
-    const remaining = Math.max(0, limit - totalExpense);
-    const usedPercentage = limit > 0 ? Math.min(100, Math.round((totalExpense / limit) * 100)) : 0;
+    const remaining = Math.max(0, limit - totalCreditExpense);
+    const usedPercentage = limit > 0 ? Math.min(100, Math.round((totalCreditExpense / limit) * 100)) : 0;
     let cardStatus: 'none' | 'ok' | 'warning' | 'danger' | 'exceeded' = 'none';
 
     if (limit > 0) {
-      if (totalExpense > limit) cardStatus = 'exceeded';
+      if (totalCreditExpense > limit) cardStatus = 'exceeded';
       else if (usedPercentage >= 90) cardStatus = 'danger';
       else if (usedPercentage >= 70) cardStatus = 'warning';
       else cardStatus = 'ok';
@@ -79,11 +105,13 @@ export class DashboardService {
       currentBalance,
       totalIncome,
       totalExpense,
+      totalCreditExpense,
+      totalDebitExpense,
       previousMonthBalance,
       monthChangePercentage,
       creditCard: {
         limit,
-        spent: totalExpense,
+        spent: totalCreditExpense,
         remaining,
         usedPercentage,
         status: cardStatus,
@@ -151,6 +179,7 @@ export class DashboardService {
           description: t.description,
           amount: amt,
           type: t.type,
+          paymentMethod: t.paymentMethod,
           category: t.category ? { name: t.category.name, icon: t.category.icon, color: t.category.color } : null,
         });
       }
@@ -164,9 +193,18 @@ export class DashboardService {
     };
   }
 
-  async getByCategory(userId: string) {
+  async getByCategory(userId: string, yearMonth?: string) {
+    const where: any = { userId, deletedAt: null, type: 'expense' };
+
+    if (yearMonth && /^\d{4}-\d{2}$/.test(yearMonth)) {
+      const [y, m] = yearMonth.split('-').map(Number);
+      const startDate = new Date(y, m - 1, 1);
+      const endDate = new Date(y, m, 0, 23, 59, 59);
+      where.date = { gte: startDate, lte: endDate };
+    }
+
     const txs = await this.prisma.transaction.findMany({
-      where: { userId, deletedAt: null, type: 'expense' },
+      where,
       include: { category: true },
     });
 

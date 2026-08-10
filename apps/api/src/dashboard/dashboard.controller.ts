@@ -11,8 +11,8 @@ export class DashboardController {
 
   @Get('summary')
   @ApiOperation({ summary: 'Resumo financeiro do mês (saldo, total de receitas, total de despesas, meta de cartão e % de variação)' })
-  getSummary(@CurrentUser() user: any) {
-    return this.dashboardService.getSummary(user.id);
+  getSummary(@CurrentUser() user: any, @Query('month') month?: string) {
+    return this.dashboardService.getSummary(user.id, month);
   }
 
   @Get('calendar')
@@ -23,8 +23,8 @@ export class DashboardController {
 
   @Get('by-category')
   @ApiOperation({ summary: 'Distribuição de despesas agrupadas por categoria (dados para gráfico Donut)' })
-  getByCategory(@CurrentUser() user: any) {
-    return this.dashboardService.getByCategory(user.id);
+  getByCategory(@CurrentUser() user: any, @Query('month') month?: string) {
+    return this.dashboardService.getByCategory(user.id, month);
   }
 
   @Get('monthly-evolution')

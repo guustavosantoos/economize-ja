@@ -370,11 +370,14 @@ function NewTransactionForm() {
                 <div className="bg-surface-container-low dark:bg-[#1e2836]/60 p-4 rounded-2xl border border-surface-variant dark:border-[#253346] space-y-2">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-bold text-on-surface">
-                      Parcelamento
+                      Parcelamento (Valor Total: R$ {amount || '0,00'})
                     </label>
                     {installmentsCount > 1 && (
                       <span className="text-[11px] font-bold text-primary dark:text-[#2dd4bf]">
-                        {installmentsCount} parcelas mensais
+                        {installmentsCount}x de R$ {(() => {
+                          const cleanNum = parseFloat(amount.replace(/\./g, '').replace(',', '.')) || 0;
+                          return (cleanNum / installmentsCount).toFixed(2).replace('.', ',');
+                        })()} / mês
                       </span>
                     )}
                   </div>
@@ -385,11 +388,15 @@ function NewTransactionForm() {
                       className="w-full p-3.5 rounded-xl border border-surface-variant dark:border-[#253346] bg-white dark:bg-[#151d27] text-on-surface font-bold text-xs focus:outline-none focus:border-primary appearance-none pr-10"
                     >
                       <option value={1}>1x - À vista (R$ {amount || '0,00'})</option>
-                      {[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 24].map((n) => (
-                        <option key={n} value={n}>
-                          {n}x de R$ {amount || '0,00'} / mês
-                        </option>
-                      ))}
+                      {[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 24].map((n) => {
+                        const cleanNum = parseFloat(amount.replace(/\./g, '').replace(',', '.')) || 0;
+                        const instVal = cleanNum > 0 ? (cleanNum / n).toFixed(2).replace('.', ',') : '0,00';
+                        return (
+                          <option key={n} value={n}>
+                            {n}x de R$ {instVal} / mês (Total R$ {amount || '0,00'})
+                          </option>
+                        );
+                      })}
                     </select>
                     <span className="material-symbols-outlined absolute right-3 top-3.5 pointer-events-none text-outline">
                       keyboard_arrow_down
@@ -397,7 +404,10 @@ function NewTransactionForm() {
                   </div>
                   {installmentsCount > 1 && (
                     <p className="text-[11px] text-outline font-medium">
-                      💡 A compra será replicada automaticamente nos próximos {installmentsCount} meses (uma parcela em cada mês).
+                      💡 Compra Total: <strong>R$ {amount || '0,00'}</strong> em <strong>{installmentsCount}x de R$ {(() => {
+                        const cleanNum = parseFloat(amount.replace(/\./g, '').replace(',', '.')) || 0;
+                        return (cleanNum / installmentsCount).toFixed(2).replace('.', ',');
+                      })()} / mês</strong>. Uma parcela será agendada automaticamente em cada mês.
                     </p>
                   )}
                 </div>

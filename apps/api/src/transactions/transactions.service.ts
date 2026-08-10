@@ -9,11 +9,51 @@ import { AuditService } from '../audit/audit.service';
 export class TransactionsService {
   constructor(private prisma: PrismaService, private audit: AuditService) {}
 
-  create(userId: string, dto: CreateTransactionDto) {
+  async create(userId: string, dto: CreateTransactionDto) {
+    const installmentsCount = dto.installmentsCount && dto.installmentsCount > 1 ? Number(dto.installmentsCount) : 1;
+    const paymentMethod = dto.paymentMethod || (installmentsCount > 1 ? 'credit' : 'debit');
+
+    if (installmentsCount > 1) {
+      const installmentGroup = crypto.randomUUID();
+      const baseDate = new Date(dto.date);
+      const baseDescription = dto.description || 'Compra Parcelada';
+      const totalAmount = Number(dto.amount);
+      const installmentAmount = Number((totalAmount / installmentsCount).toFixed(2));
+
+      const transactionsData: any[] = [];
+      for (let i = 0; i < installmentsCount; i++) {
+        const date = new Date(baseDate.getFullYear(), baseDate.getMonth() + i, baseDate.getDate());
+        transactionsData.push({
+          userId,
+          type: dto.type,
+          paymentMethod,
+          installmentsCount,
+          installmentNumber: i + 1,
+          installmentGroup,
+          amount: installmentAmount,
+          date,
+          categoryId: dto.categoryId,
+          description: `${baseDescription} (${i + 1}/${installmentsCount})`,
+        });
+      }
+
+      await this.prisma.transaction.createMany({
+        data: transactionsData,
+      });
+
+      return this.prisma.transaction.findFirst({
+        where: { userId, installmentGroup, installmentNumber: 1 },
+        include: { category: true },
+      });
+    }
+
     return this.prisma.transaction.create({
       data: {
         userId,
         type: dto.type,
+        paymentMethod,
+        installmentsCount: 1,
+        installmentNumber: 1,
         amount: dto.amount,
         date: new Date(dto.date),
         categoryId: dto.categoryId,

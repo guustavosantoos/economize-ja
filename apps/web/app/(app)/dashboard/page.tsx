@@ -110,8 +110,8 @@ export default function Dashboard() {
     async function loadDashboardData() {
       try {
         const [sumRes, catRes, evoRes, txRes, calRes] = await Promise.allSettled([
-          apiClient.get('/dashboard/summary'),
-          apiClient.get('/dashboard/by-category'),
+          apiClient.get(`/dashboard/summary?month=${calendarMonth}`),
+          apiClient.get(`/dashboard/by-category?month=${calendarMonth}`),
           apiClient.get('/dashboard/monthly-evolution'),
           apiClient.get('/transactions'),
           apiClient.get(`/dashboard/calendar?month=${calendarMonth}`),

@@ -193,11 +193,61 @@ export class TelegramService {
     const link = await this.prisma.telegramLink.findFirst({ where: { telegramChatId: BigInt(chatId) } });
     if (!link) throw new UnauthorizedException('Conta não vinculada');
 
+    const installmentsCount = dto.installmentsCount && dto.installmentsCount > 1 ? Number(dto.installmentsCount) : 1;
+    const paymentMethod = dto.paymentMethod || (installmentsCount > 1 ? 'credit' : 'debit');
+
+    if (installmentsCount > 1) {
+      const installmentGroup = crypto.randomUUID();
+      const baseDate = new Date(dto.date);
+      const baseDescription = dto.description || 'Compra Parcelada';
+      const totalAmount = Number(dto.amount);
+      const installmentAmount = Number((totalAmount / installmentsCount).toFixed(2));
+
+      const transactionsData: any[] = [];
+      for (let i = 0; i < installmentsCount; i++) {
+        const date = new Date(baseDate.getFullYear(), baseDate.getMonth() + i, baseDate.getDate());
+        transactionsData.push({
+          userId: link.userId,
+          type: dto.type,
+          paymentMethod,
+          installmentsCount,
+          installmentNumber: i + 1,
+          installmentGroup,
+          amount: installmentAmount,
+          date,
+          description: `${baseDescription} (${i + 1}/${installmentsCount})`,
+          source: (dto.source as any) || 'bot_free',
+        });
+      }
+
+      await this.prisma.transaction.createMany({
+        data: transactionsData,
+      });
+
+      const tx = await this.prisma.transaction.findFirst({
+        where: { userId: link.userId, installmentGroup, installmentNumber: 1 },
+      });
+
+      await this.audit.log(link.userId, 'bot_transaction_created_installments', {}, { count: installmentsCount });
+
+      return {
+        id: tx?.id,
+        type: dto.type,
+        amount: installmentAmount,
+        description: dto.description,
+        date: dto.date,
+        installmentsCount,
+        creditCardAlert: null,
+      };
+    }
+
     const tx = await this.prisma.transaction.create({
       data: {
         userId: link.userId,
         type: dto.type,
         paymentMethod: dto.paymentMethod || 'debit',
+        installmentsCount: 1,
+        installmentNumber: 1,
         amount: dto.amount,
         date: new Date(dto.date),
         description: dto.description,
