@@ -81,6 +81,18 @@ function formatBRL(amount: number) {
 export default function Dashboard() {
   const { theme, toggleTheme } = useThemeStore();
   const [forceOpenPwa, setForceOpenPwa] = useState(false);
+  const [isAppleDevice, setIsAppleDevice] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const ua = window.navigator.userAgent;
+      const isIos = /iPhone|iPad|iPod/i.test(ua) || (window.navigator.platform === 'MacIntel' && window.navigator.maxTouchPoints > 1);
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
+      if (isIos && !isStandalone) {
+        setIsAppleDevice(true);
+      }
+    }
+  }, []);
   const [summary, setSummary] = useState<Summary | null>(null);
   const [categoriesData, setCategoriesData] = useState<CategoryData[]>([]);
   const [evolutionData, setEvolutionData] = useState<EvolutionData[]>([]);
@@ -248,14 +260,16 @@ export default function Dashboard() {
         </div>
 
         <div className="flex items-center gap-2.5">
-          <button
-            onClick={() => setForceOpenPwa(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 text-xs font-extrabold hover:bg-emerald-500/20 transition-all shadow-2xs"
-            title="Como instalar o aplicativo na tela de início"
-          >
-            <span className="material-symbols-outlined text-base">install_mobile</span>
-            <span className="hidden sm:inline">Instalar App</span>
-          </button>
+          {isAppleDevice && (
+            <button
+              onClick={() => setForceOpenPwa(true)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 text-xs font-extrabold hover:bg-emerald-500/20 transition-all shadow-2xs"
+              title="Como instalar o aplicativo na tela de início"
+            >
+              <span className="material-symbols-outlined text-base">install_mobile</span>
+              <span className="hidden sm:inline">Instalar App</span>
+            </button>
+          )}
 
           <button
             onClick={toggleTheme}

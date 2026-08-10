@@ -21,10 +21,15 @@ export default function PwaInstallPrompt({ forceOpen = false, onCloseForce }: Pw
 
     if (isStandalone) return;
 
-    // Detectar sistema operacional
+    // Detectar sistema operacional Apple (iPhone / iPad / iPod / Mac Touch)
     const ua = window.navigator.userAgent;
     const isIos = /iPhone|iPad|iPod/i.test(ua) || (window.navigator.platform === 'MacIntel' && window.navigator.maxTouchPoints > 1);
     setIsApple(isIos);
+
+    // Se NÃO for um dispositivo Apple, não exibir o prompt de instalação
+    if (!isIos) {
+      return;
+    }
 
     if (forceOpen) {
       setShowTutorialModal(true);
