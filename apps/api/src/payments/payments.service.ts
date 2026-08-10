@@ -93,31 +93,139 @@ export class PaymentsService {
 
     this.logger.log(`Stripe Event Recebido: ${event.type}`);
 
-    if (event.type === 'checkout.session.completed') {
-      const session = event.data.object as Stripe.Checkout.Session;
-      const userId = session.metadata?.userId;
+    switch (event.type) {
+      // 1. Checkout Concluído e Confirmado -> Liberar PRO
+      case 'checkout.session.completed': {
+        const session = event.data.object as Stripe.Checkout.Session;
+        const userId = session.metadata?.userId;
+        const email = session.customer_email || session.customer_details?.email;
 
-      if (userId) {
-        this.logger.log(`Promovendo usuário ${userId} para o Plano PRO!`);
-        await this.prisma.user.update({
-          where: { id: userId },
-          data: { plan: 'pro' },
-        });
-      }
-    } else if (event.type === 'customer.subscription.deleted') {
-      const subscription = event.data.object as Stripe.Subscription;
-      const customerEmail = (subscription as any).customer_email;
-
-      if (customerEmail) {
-        this.logger.log(`Assinatura cancelada para ${customerEmail}. Retornando plano para Free.`);
-        const user = await this.prisma.user.findFirst({ where: { email: customerEmail } });
-        if (user) {
-          await this.prisma.user.update({
-            where: { id: user.id },
-            data: { plan: 'free' },
-          });
+        if (session.payment_status === 'paid') {
+          if (userId) {
+            this.logger.log(`[Webhook] Pagamento CONFIRMADO para userId: ${userId}. Ativando PRO!`);
+            await this.prisma.user.update({
+              where: { id: userId },
+              data: { plan: 'pro' },
+            });
+          } else if (email) {
+            const user = await this.prisma.user.findFirst({ where: { email } });
+            if (user) {
+              this.logger.log(`[Webhook] Pagamento CONFIRMADO para email: ${email}. Ativando PRO!`);
+              await this.prisma.user.update({
+                where: { id: user.id },
+                data: { plan: 'pro' },
+              });
+            }
+          }
         }
+        break;
       }
+
+      // 2. Pagamento de Fatura Recorrente Confirmado -> Garantir PRO
+      case 'invoice.payment_succeeded': {
+        const invoice = event.data.object as Stripe.Invoice;
+        const email = invoice.customer_email;
+
+        if (email) {
+          const user = await this.prisma.user.findFirst({ where: { email } });
+          if (user && user.plan !== 'pro') {
+            this.logger.log(`[Webhook] Renovação de fatura confirmada para ${email}. Mantendo PRO ativado.`);
+            await this.prisma.user.update({
+              where: { id: user.id },
+              data: { plan: 'pro' },
+            });
+          }
+        }
+        break;
+      }
+
+      // 3. Pagamento Recusado / Cartão Não Passou -> Cancelar PRO
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object as Stripe.Invoice;
+        const email = invoice.customer_email;
+
+        if (email) {
+          this.logger.warn(`[Webhook] Pagamento de fatura FALHOU para ${email}. Removendo PRO (retornando para FREE).`);
+          const user = await this.prisma.user.findFirst({ where: { email } });
+          if (user) {
+            await this.prisma.user.update({
+              where: { id: user.id },
+              data: { plan: 'free' },
+            });
+          }
+        }
+        break;
+      }
+
+      // 4. Assinatura Cancelada -> Cancelar PRO
+      case 'customer.subscription.deleted': {
+        const subscription = event.data.object as Stripe.Subscription;
+        let email = (subscription as any).customer_email;
+
+        if (!email && subscription.customer) {
+          try {
+            const customerObj = await this.stripe.customers.retrieve(subscription.customer as string);
+            if (customerObj && !customerObj.deleted) {
+              email = customerObj.email;
+            }
+          } catch {
+            // ignore
+          }
+        }
+
+        if (email) {
+          this.logger.log(`[Webhook] Assinatura CANCELADA para ${email}. Retornando plano para FREE.`);
+          const user = await this.prisma.user.findFirst({ where: { email } });
+          if (user) {
+            await this.prisma.user.update({
+              where: { id: user.id },
+              data: { plan: 'free' },
+            });
+          }
+        }
+        break;
+      }
+
+      // 5. Atualização de Assinatura (ex: Inadimplência ou Cancelamento Futuro)
+      case 'customer.subscription.updated': {
+        const subscription = event.data.object as Stripe.Subscription;
+        let email = (subscription as any).customer_email;
+
+        if (!email && subscription.customer) {
+          try {
+            const customerObj = await this.stripe.customers.retrieve(subscription.customer as string);
+            if (customerObj && !customerObj.deleted) {
+              email = customerObj.email;
+            }
+          } catch {
+            // ignore
+          }
+        }
+
+        if (email) {
+          const user = await this.prisma.user.findFirst({ where: { email } });
+          if (user) {
+            if (['canceled', 'unpaid', 'incomplete_expired'].includes(subscription.status)) {
+              this.logger.warn(`[Webhook] Status da assinatura de ${email} alterado para ${subscription.status}. Removendo PRO.`);
+              await this.prisma.user.update({
+                where: { id: user.id },
+                data: { plan: 'free' },
+              });
+            } else if (['active', 'trialing'].includes(subscription.status) && user.plan !== 'pro') {
+              this.logger.log(`[Webhook] Status da assinatura de ${email} alterado para ${subscription.status}. Ativando PRO.`);
+              await this.prisma.user.update({
+                where: { id: user.id },
+                data: { plan: 'pro' },
+              });
+            }
+          }
+        }
+        break;
+      }
+
+      default:
+        this.logger.log(`[Webhook] Evento ${event.type} recebido sem manipulador específico.`);
+        break;
     }
 
     return { received: true };
