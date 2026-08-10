@@ -475,115 +475,170 @@ function HowItWorks() {
 }
 
 /* ─── Pricing ─── */
-const freeFeatures = [
-  'Transações ilimitadas (gastos e receitas)',
-  'Dashboard com saldo e gráficos',
-  'Gastos por categoria e evolução mensal',
-  'Bot do Telegram com comandos simples',
-  'Exportação e exclusão dos seus dados',
-];
-const proFeatures = [
-  'Tudo do plano Free, e mais:',
-  'IA no Telegram que entende frases livres',
-  'Lembretes de contas com recorrência',
-  'WhatsApp (em breve)',
-  'Open Finance — conexão com bancos (em breve)',
-];
-
 function Pricing() {
+  const [cycle, setCycle] = useState<'monthly' | 'quarterly' | 'annual'>('annual');
+
+  const priceData = {
+    monthly: { price: '14,99', period: '/ mês', totalNote: 'Cobrado R$ 14,99 por mês', badge: '' },
+    quarterly: { price: '12,74', period: '/ mês', totalNote: 'Cobrado R$ 38,22 a cada 3 meses', badge: 'Economize 15%' },
+    annual: { price: '9,74', period: '/ mês', totalNote: 'Cobrado R$ 116,90 por ano (Economize R$ 63,00!)', badge: '🔥 MAIS POPULAR (-35% OFF)' },
+  };
+
+  const currentPrice = priceData[cycle];
+
+  const proFeaturesList = [
+    'Bot no Telegram com IA que entende áudios e texto livre',
+    'Gestão completa de cartão de crédito e parcelamentos (1x a 24x)',
+    'Alertas automáticos de meta e projeção de faturas',
+    'Relatórios detalhados e gráficos por categoria ilimitados',
+    'Lembretes de contas a pagar para evitar juros e multas',
+    'Exportação ilimitada de dados (JSON/Excel)',
+    'Prioridade no lançamento do Open Finance (conexão bancária)',
+  ];
+
   return (
-    <section id="planos" className="py-20" style={{ background: '#F8F9FA' }}>
-      <div className="max-w-6xl mx-auto px-5 flex flex-col items-center gap-12">
+    <section id="planos" className="py-20 bg-slate-50 border-y border-slate-200">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col items-center gap-10">
         <SectionHeading
-          eyebrow="Planos"
-          title="Comece de graça, evolua quando quiser"
-          subtitle="O plano Free já resolve o seu dia a dia. O Pro chega para quem quer piloto automático nas finanças."
+          eyebrow="Invista no seu futuro"
+          title="Coloque suas finanças no piloto automático"
+          subtitle="Escolha o plano ideal. Pague menos de R$ 0,33 por dia para economizar centenas de reais todos os meses."
           center
         />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
-          {/* Free */}
-          <div
-            className="flex flex-col gap-5 p-7 rounded-2xl border"
-            style={{ background: '#FFFFFF', borderColor: '#E1E3E4', boxShadow: '0 4px 12px rgba(13,77,77,0.05)' }}
+
+        {/* ── Billing Cycle Toggler ── */}
+        <div className="bg-slate-200/90 p-1.5 rounded-2xl flex flex-wrap items-center justify-center gap-1 max-w-md w-full">
+          <button
+            type="button"
+            onClick={() => setCycle('monthly')}
+            className={`flex-1 min-w-[90px] py-2.5 px-3 rounded-xl font-bold text-xs transition-all ${
+              cycle === 'monthly'
+                ? 'bg-white text-slate-900 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
           >
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-bold" style={{ color: '#003535' }}>Free</h3>
-              <span
-                className="text-xs font-semibold px-3 py-1 rounded-full"
-                style={{ background: '#E3F7EE', color: '#006C49' }}
-              >
-                Para sempre
-              </span>
+            Mensal
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setCycle('quarterly')}
+            className={`flex-1 min-w-[110px] py-2.5 px-3 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1 ${
+              cycle === 'quarterly'
+                ? 'bg-white text-emerald-700 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <span>Trimestral</span>
+            <span className="bg-emerald-100 text-emerald-800 text-[10px] px-1.5 py-0.5 rounded font-extrabold">-15%</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setCycle('annual')}
+            className={`flex-1 min-w-[130px] py-2.5 px-3 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1 ${
+              cycle === 'annual'
+                ? 'bg-emerald-600 text-white shadow-md'
+                : 'text-slate-700 font-extrabold hover:text-slate-900'
+            }`}
+          >
+            <span>Anual</span>
+            <span className="bg-amber-400 text-slate-950 text-[10px] px-1.5 py-0.5 rounded font-extrabold">-35% OFF</span>
+          </button>
+        </div>
+
+        {/* ── Pricing Cards Grid ── */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full items-stretch">
+          {/* Free Card */}
+          <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-xs flex flex-col justify-between space-y-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-black text-slate-900">Plano Free</h3>
+                <span className="text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-600">
+                  Gratuito para Sempre
+                </span>
+              </div>
+              <div className="flex items-baseline gap-1">
+                <span className="text-4xl font-black text-slate-900">R$ 0</span>
+                <span className="text-sm font-semibold text-slate-500">/mês</span>
+              </div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Tudo que você precisa para começar a organizar suas finanças diárias.
+              </p>
+              <ul className="space-y-3 pt-2">
+                {[
+                  'Transações ilimitadas no app',
+                  'Dashboard financeiro com saldo',
+                  'Bot do Telegram com comandos simples',
+                  'Filtros por categoria e gráficos',
+                  'Exportação em formato JSON (LGPD)',
+                ].map((f) => (
+                  <li key={f} className="flex items-center gap-2.5 text-xs font-semibold text-slate-700">
+                    <span className="material-symbols-outlined text-emerald-600 text-base">check_circle</span>
+                    {f}
+                  </li>
+                ))}
+              </ul>
             </div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-4xl font-bold" style={{ color: '#191C1D' }}>R$ 0</span>
-              <span className="text-sm" style={{ color: '#707978' }}>/mês</span>
-            </div>
-            <p className="text-sm leading-relaxed" style={{ color: '#404848' }}>
-              Tudo que você precisa para organizar suas finanças e criar o hábito.
-            </p>
-            <ul className="flex flex-col gap-2.5 flex-1">
-              {freeFeatures.map((f) => (
-                <li key={f} className="flex items-start gap-2.5 text-sm" style={{ color: '#404848' }}>
-                  <span className="material-symbols-outlined text-base flex-shrink-0 mt-0.5" style={{ color: '#006C49', pointerEvents: 'none', fontSize: '16px' }}>
-                    check
-                  </span>
-                  {f}
-                </li>
-              ))}
-            </ul>
             <Link
               href="/register"
-              className="w-full text-center text-sm font-semibold py-3 rounded-xl border-2 transition-all hover:bg-surface-container active:scale-95"
-              style={{ borderColor: '#003535', color: '#003535' }}
+              className="w-full text-center text-xs font-bold py-3.5 rounded-xl border border-slate-300 text-slate-800 hover:bg-slate-50 transition-all"
             >
-              Criar conta grátis
+              Criar Conta Grátis
             </Link>
           </div>
 
-          {/* Pro */}
-          <div
-            className="flex flex-col gap-5 p-7 rounded-2xl"
-            style={{
-              background: 'linear-gradient(160deg, #003535, #04211F)',
-              boxShadow: '0 22px 48px rgba(0,53,53,0.28)',
-            }}
-          >
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-bold text-white">Pro</h3>
-              <span
-                className="text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1"
-                style={{ background: '#6CF8BB', color: '#003535' }}
-              >
-                <span className="material-symbols-outlined text-xs" style={{ pointerEvents: 'none', fontSize: '12px' }}>
-                  auto_awesome
-                </span>
-                Recomendado
-              </span>
-            </div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-bold text-white">Em breve</span>
-            </div>
-            <p className="text-sm leading-relaxed" style={{ color: '#DDECEB' }}>
-              Automação com IA e recursos avançados para quem leva o controle a sério.
-            </p>
-            <ul className="flex flex-col gap-2.5 flex-1">
-              {proFeatures.map((f) => (
-                <li key={f} className="flex items-start gap-2.5 text-sm" style={{ color: '#DDECEB' }}>
-                  <span className="material-symbols-outlined text-base flex-shrink-0 mt-0.5" style={{ color: '#6CF8BB', pointerEvents: 'none', fontSize: '16px' }}>
-                    check
+          {/* Pro Card (Persuasive Glow Card) */}
+          <div className="relative bg-gradient-to-br from-[#003535] via-[#042626] to-[#001f1f] text-white p-8 rounded-3xl shadow-2xl border-2 border-emerald-400/40 flex flex-col justify-between space-y-6 overflow-hidden">
+            <div className="absolute -right-12 -top-12 w-40 h-40 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
+
+            <div className="space-y-4 relative z-10">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-black text-white flex items-center gap-2">
+                  Plano PRO
+                  <span className="material-symbols-outlined text-amber-400 text-lg">auto_awesome</span>
+                </h3>
+                {currentPrice.badge && (
+                  <span className="text-[11px] font-black px-3 py-1 rounded-full bg-emerald-400 text-slate-950 uppercase tracking-wider shadow-sm">
+                    {currentPrice.badge}
                   </span>
-                  {f}
-                </li>
-              ))}
-            </ul>
-            <Link
-              href="/register"
-              className="w-full text-center text-sm font-semibold py-3 rounded-xl text-white transition-all hover:opacity-90 active:scale-95"
-              style={{ background: '#006C49' }}
-            >
-              Começar no Free
-            </Link>
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-xs text-slate-300 font-bold">R$</span>
+                  <span className="text-4xl font-black text-white">{currentPrice.price}</span>
+                  <span className="text-xs text-emerald-300 font-bold">{currentPrice.period}</span>
+                </div>
+                <p className="text-[11px] text-emerald-200 font-medium">{currentPrice.totalNote}</p>
+              </div>
+
+              <p className="text-xs text-slate-200 leading-relaxed font-medium">
+                Piloto automático com Inteligência Artificial no Telegram, parcelamentos e lembretes para economizar de verdade.
+              </p>
+
+              <ul className="space-y-3 pt-2">
+                {proFeaturesList.map((f) => (
+                  <li key={f} className="flex items-start gap-2.5 text-xs font-semibold text-slate-100">
+                    <span className="material-symbols-outlined text-emerald-400 text-base flex-shrink-0 mt-0.5">check_circle</span>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="space-y-2 relative z-10 pt-2">
+              <Link
+                href="/register"
+                className="block w-full text-center text-xs font-black py-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.02] active:scale-95"
+              >
+                Garantir Plano PRO com Desconto
+              </Link>
+              <p className="text-[10px] text-center text-slate-300 font-medium">
+                🛡️ 7 dias de garantia incondicional de satisfação
+              </p>
+            </div>
           </div>
         </div>
       </div>
