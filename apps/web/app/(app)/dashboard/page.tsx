@@ -17,6 +17,7 @@ import {
 
 type Summary = {
   currentBalance: number;
+  monthBalance?: number;
   totalIncome: number;
   totalExpense: number;
   previousMonthBalance: number;
@@ -345,9 +346,18 @@ export default function Dashboard() {
         {/* Big Balance */}
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-widest text-outline dark:text-slate-400">Saldo do Mês</p>
-          <h2 className="text-4xl sm:text-5xl font-extrabold text-[#006c49] dark:text-[#34d399] tracking-tight tabular-nums mt-1">
-            {loading ? 'R$ ...' : formatBRL(balance)}
+          <h2
+            className={`text-4xl sm:text-5xl font-extrabold tracking-tight tabular-nums mt-1 ${
+              (summary?.monthBalance ?? (income - expense)) < 0
+                ? 'text-rose-600 dark:text-rose-400'
+                : 'text-[#006c49] dark:text-[#34d399]'
+            }`}
+          >
+            {loading ? 'R$ ...' : formatBRL(summary?.monthBalance ?? (income - expense))}
           </h2>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">
+            Saldo acumulado em conta: <strong>{formatBRL(summary?.currentBalance || 0)}</strong>
+          </p>
         </div>
 
         {/* Entradas & Gastos (Cards Refinados) */}

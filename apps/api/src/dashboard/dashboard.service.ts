@@ -117,8 +117,11 @@ export class DashboardService {
       else cardStatus = 'ok';
     }
 
+    const monthBalance = totalIncome - totalExpense;
+
     const result = {
       currentBalance,
+      monthBalance,
       totalIncome,
       totalExpense,
       totalCreditExpense,
