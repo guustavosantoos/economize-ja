@@ -28,26 +28,48 @@ export class CategoriesService {
   constructor(private prisma: PrismaService) {}
 
   async create(userId: string, dto: CreateCategoryDto) {
-    return this.prisma.category.create({
+    const showInDash = (dto as any).showInDashboard ?? true;
+    const cat = await this.prisma.category.create({
       data: {
         name: dto.name,
         type: dto.type,
         icon: dto.icon || (dto.type === 'income' ? 'payments' : 'shopping_bag'),
         color: dto.color || (dto.type === 'income' ? '#10b981' : '#ef4444'),
-        showInDashboard: (dto as any).showInDashboard ?? true,
         userId,
         isDefault: false,
-      } as any,
+      },
     });
+
+    if (showInDash === false) {
+      await this.prisma.$executeRawUnsafe(
+        `UPDATE categories SET show_in_dashboard = false WHERE id = $1`,
+        cat.id
+      );
+      (cat as any).showInDashboard = false;
+    } else {
+      (cat as any).showInDashboard = true;
+    }
+
+    return cat;
   }
 
   async findAll(userId: string) {
-    let categories = await this.prisma.category.findMany({
-      where: { OR: [{ userId }, { userId: null }] },
-      orderBy: { name: 'asc' },
-    });
+    const categories: any[] = await this.prisma.$queryRawUnsafe(`
+      SELECT 
+        id, 
+        user_id as "userId", 
+        name, 
+        icon, 
+        color, 
+        type, 
+        is_default as "isDefault", 
+        COALESCE(show_in_dashboard, true) as "showInDashboard", 
+        created_at as "createdAt"
+      FROM categories
+      WHERE user_id = $1 OR user_id IS NULL
+      ORDER BY name ASC
+    `, userId);
 
-    // Se o banco não possuir categorias padrões, realiza a criação automática dos padrões
     if (categories.length === 0) {
       await this.prisma.category.createMany({
         data: DEFAULT_CATEGORIES.map((c) => ({
@@ -57,20 +79,50 @@ export class CategoriesService {
         skipDuplicates: true,
       });
 
-      categories = await this.prisma.category.findMany({
-        where: { OR: [{ userId }, { userId: null }] },
-        orderBy: { name: 'asc' },
-      });
+      return this.findAll(userId);
     }
 
     return categories;
   }
 
   async update(userId: string, id: string, dto: UpdateCategoryDto) {
-    return this.prisma.category.updateMany({
-      where: { id, OR: [{ userId }, { isDefault: true }] },
-      data: dto as any,
-    });
+    const fields: string[] = [];
+    const values: any[] = [];
+    let idx = 1;
+
+    if (dto.name !== undefined) {
+      fields.push(`name = $${idx++}`);
+      values.push(dto.name);
+    }
+    if (dto.type !== undefined) {
+      fields.push(`type = $${idx++}::"TransactionType"`);
+      values.push(dto.type);
+    }
+    if (dto.icon !== undefined) {
+      fields.push(`icon = $${idx++}`);
+      values.push(dto.icon);
+    }
+    if (dto.color !== undefined) {
+      fields.push(`color = $${idx++}`);
+      values.push(dto.color);
+    }
+    if ((dto as any).showInDashboard !== undefined) {
+      fields.push(`show_in_dashboard = $${idx++}`);
+      values.push(Boolean((dto as any).showInDashboard));
+    }
+
+    if (fields.length === 0) return { count: 0 };
+
+    values.push(id);
+
+    const query = `
+      UPDATE categories 
+      SET ${fields.join(', ')}
+      WHERE id = $${idx} AND (user_id = '${userId}' OR is_default = true OR user_id IS NULL)
+    `;
+
+    const count = await this.prisma.$executeRawUnsafe(query, ...values);
+    return { count };
   }
 
   async remove(userId: string, id: string) {
