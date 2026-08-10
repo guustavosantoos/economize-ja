@@ -18,6 +18,9 @@
     "db:seed": "npm run prisma:seed --workspace=apps/api",
     "db:studio": "npm run prisma:studio --workspace=apps/api"
   },
+  "dependencies": {
+    "stripe": "^22.4.0"
+  },
   "devDependencies": {
     "concurrently": "^8.2.2"
   }
