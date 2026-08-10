@@ -111,11 +111,16 @@ export default function Dashboard() {
   useEffect(() => {
     async function loadDashboardData() {
       try {
+        const [yearStr, monthStr] = calendarMonth.split('-');
+        const lastDay = new Date(Number(yearStr), Number(monthStr), 0).getDate();
+        const startDate = `${calendarMonth}-01`;
+        const endDate = `${calendarMonth}-${String(lastDay).padStart(2, '0')}`;
+
         const [sumRes, catRes, evoRes, txRes, calRes] = await Promise.allSettled([
           apiClient.get(`/dashboard/summary?month=${calendarMonth}`),
           apiClient.get(`/dashboard/by-category?month=${calendarMonth}`),
           apiClient.get('/dashboard/monthly-evolution'),
-          apiClient.get('/transactions'),
+          apiClient.get(`/transactions?startDate=${startDate}&endDate=${endDate}`),
           apiClient.get(`/dashboard/calendar?month=${calendarMonth}`),
         ]);
 
