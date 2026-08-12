@@ -87,4 +87,36 @@ export class MailService {
       }
     }
   }
+
+  async syncContactToBrevo(email: string, name?: string) {
+    const brevoApiKey = this.configService.get('BREVO_API_KEY');
+    if (!brevoApiKey) return;
+
+    try {
+      const firstName = name ? name.split(' ')[0] : email.split('@')[0];
+      const lastName = name && name.split(' ').length > 1 ? name.split(' ').slice(1).join(' ') : '';
+
+      await axios.post(
+        'https://api.brevo.com/v3/contacts',
+        {
+          email,
+          attributes: {
+            FIRSTNAME: firstName,
+            LASTNAME: lastName,
+          },
+          updateEnabled: true,
+        },
+        {
+          headers: {
+            'api-key': brevoApiKey.trim(),
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+        }
+      );
+      console.log(`[Brevo Contact Sync] Contato ${email} sincronizado no Brevo com sucesso!`);
+    } catch (err: any) {
+      console.error('[Brevo Contact Sync Error]:', err?.response?.data || err.message);
+    }
+  }
 }

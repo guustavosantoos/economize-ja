@@ -27,8 +27,11 @@ export class AuthService {
 
     const passwordHash = await argon2.hash(dto.password, { memoryCost: 65536, timeCost: 3, parallelism: 4 });
     const user = await this.prisma.user.create({
-      data: { email: dto.email, name: dto.name, passwordHash },
+      data: { email: dto.email, name: dto.name, passwordHash, provider: 'email' },
     });
+    
+    // Sincronizar contato no Brevo
+    this.mail.syncContactToBrevo(user.email, user.name);
     
     // Gerar código numérico de 6 dígitos
     const code = Math.floor(100000 + Math.random() * 900000).toString();
@@ -175,9 +178,13 @@ export class AuthService {
           email: dto.email,
           name: dto.name || dto.email.split('@')[0],
           passwordHash,
+          provider: 'google',
           emailVerified: true,
         },
       });
+
+      // Sincronizar contato do Google no Brevo
+      this.mail.syncContactToBrevo(user.email, user.name);
     } else if (user.deletedAt) {
       throw new UnauthorizedException('Conta desativada');
     } else if (!user.emailVerified) {
