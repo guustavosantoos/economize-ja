@@ -208,8 +208,50 @@ export class DashboardService {
           amount: amt,
           type: t.type,
           paymentMethod: t.paymentMethod,
-          category: t.category ? { name: t.category.name, icon: t.category.icon, color: t.category.color } : null,
         });
+      }
+    });
+
+    // Buscar contas/lembretes ativos do usuário e incluir no calendário
+    const bills = await this.prisma.bill.findMany({
+      where: { userId, isActive: true },
+      include: { category: true },
+    });
+
+    const targetYearMonth = `${year}-${String(month + 1).padStart(2, '0')}`;
+
+    bills.forEach((bill) => {
+      const billStartMonth = bill.nextDueDate.toISOString().split('T')[0].slice(0, 7);
+      let matchesMonth = false;
+
+      if (bill.recurrence === 'monthly') {
+        matchesMonth = targetYearMonth >= billStartMonth;
+      } else if (bill.recurrence === 'yearly') {
+        const billMonth = bill.nextDueDate.toISOString().split('T')[0].slice(5, 7);
+        const currentMonthStr = String(month + 1).padStart(2, '0');
+        matchesMonth = targetYearMonth >= billStartMonth && billMonth === currentMonthStr;
+      } else {
+        matchesMonth = billStartMonth === targetYearMonth;
+      }
+
+      if (matchesMonth) {
+        const targetDay = Math.min(bill.dueDay || 10, totalDaysInMonth);
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(targetDay).padStart(2, '0')}`;
+
+        if (daysMap[dateStr]) {
+          const amt = Number(bill.amount);
+          daysMap[dateStr].totalExpense += amt;
+
+          daysMap[dateStr].transactions.push({
+            id: `bill-${bill.id}`,
+            description: `[Lembrete] ${bill.name}`,
+            amount: amt,
+            type: 'expense',
+            paymentMethod: 'bill',
+            category: bill.category ? { name: bill.category.name, icon: bill.category.icon, color: bill.category.color } : null,
+            isBillReminder: true,
+          });
+        }
       }
     });
 

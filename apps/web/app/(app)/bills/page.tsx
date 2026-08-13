@@ -124,12 +124,46 @@ export default function BillsPage() {
     return label.charAt(0).toUpperCase() + label.slice(1);
   };
 
-  // Filter Pending Bills by Selected Month
+  // Filter Pending Bills by Selected Month (com projeção de recorrência)
   const filteredPendingBills = useMemo(() => {
-    return bills.filter((bill) => {
-      if (!bill.nextDueDate) return true;
-      return bill.nextDueDate.startsWith(selectedMonth);
-    });
+    const now = new Date();
+    const todayStr = now.toISOString().split('T')[0];
+
+    return bills
+      .filter((bill) => {
+        if (!bill.nextDueDate) return true;
+        const billStartMonth = bill.nextDueDate.slice(0, 7);
+
+        // Se a conta for mensal (monthly), ela se repete em todos os meses >= ao mês de criação/início
+        if (bill.recurrence === 'monthly') {
+          return selectedMonth >= billStartMonth;
+        }
+
+        // Se for anual (yearly), repete todo ano no mesmo mês
+        if (bill.recurrence === 'yearly') {
+          const billMonth = bill.nextDueDate.slice(5, 7);
+          const currentMonth = selectedMonth.slice(5, 7);
+          return selectedMonth >= billStartMonth && billMonth === currentMonth;
+        }
+
+        // Se for pontual ('once'), exibe apenas no mês exato do vencimento
+        return billStartMonth === selectedMonth;
+      })
+      .map((bill) => {
+        // Ajusta a data do vencimento projetada para refletir o mês selecionado
+        const targetDay = String(bill.dueDay || 10).padStart(2, '0');
+        const projectedDueDate = `${selectedMonth}-${targetDay}`;
+
+        let status: 'overdue' | 'today' | 'pending' = 'pending';
+        if (projectedDueDate < todayStr) status = 'overdue';
+        else if (projectedDueDate === todayStr) status = 'today';
+
+        return {
+          ...bill,
+          nextDueDate: projectedDueDate,
+          status,
+        };
+      });
   }, [bills, selectedMonth]);
 
   // Filter Paid History by Selected Month
