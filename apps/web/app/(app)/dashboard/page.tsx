@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { apiClient } from '../../../lib/api-client';
 import TransactionItem from '../../../components/TransactionItem';
@@ -126,8 +126,22 @@ export default function Dashboard() {
     }
   }, []);
 
+  const dashboardCacheRef = useRef<Record<string, any>>({});
+
   useEffect(() => {
     async function loadDashboardData() {
+      // 🚀 1. Se já tiver dados em cache para este mês, exibe instantaneamente (0ms latency)
+      if (dashboardCacheRef.current[calendarMonth]) {
+        const cached = dashboardCacheRef.current[calendarMonth];
+        setSummary(cached.summary);
+        setCategoriesData(cached.categoriesData);
+        setRecentTransactions(cached.recentTransactions);
+        setCalendarData(cached.calendarData);
+        setLoading(false);
+      } else {
+        setLoading(true);
+      }
+
       try {
         const [yearStr, monthStr] = calendarMonth.split('-');
         const lastDay = new Date(Number(yearStr), Number(monthStr), 0).getDate();
@@ -143,12 +157,27 @@ export default function Dashboard() {
           apiClient.get('/categories'),
         ]);
 
-        if (sumRes.status === 'fulfilled' && sumRes.value) setSummary(sumRes.value);
-        if (catRes.status === 'fulfilled' && Array.isArray(catRes.value)) setCategoriesData(catRes.value);
-        if (evoRes.status === 'fulfilled' && Array.isArray(evoRes.value)) setEvolutionData(evoRes.value);
-        if (txRes.status === 'fulfilled' && Array.isArray(txRes.value)) setRecentTransactions(txRes.value.slice(0, 5));
-        if (calRes.status === 'fulfilled' && calRes.value) setCalendarData(calRes.value);
-        if (allCatRes.status === 'fulfilled' && Array.isArray(allCatRes.value)) setAllUserCategories(allCatRes.value);
+        const freshSummary = sumRes.status === 'fulfilled' ? sumRes.value : null;
+        const freshCat = catRes.status === 'fulfilled' && Array.isArray(catRes.value) ? catRes.value : [];
+        const freshEvo = evoRes.status === 'fulfilled' && Array.isArray(evoRes.value) ? evoRes.value : [];
+        const freshTx = txRes.status === 'fulfilled' && Array.isArray(txRes.value) ? txRes.value.slice(0, 5) : [];
+        const freshCal = calRes.status === 'fulfilled' ? calRes.value : null;
+        const freshAllCat = allCatRes.status === 'fulfilled' && Array.isArray(allCatRes.value) ? allCatRes.value : [];
+
+        if (freshSummary) setSummary(freshSummary);
+        if (freshCat.length > 0) setCategoriesData(freshCat);
+        if (freshEvo.length > 0) setEvolutionData(freshEvo);
+        setRecentTransactions(freshTx);
+        if (freshCal) setCalendarData(freshCal);
+        if (freshAllCat.length > 0) setAllUserCategories(freshAllCat);
+
+        // Guardar em cache local
+        dashboardCacheRef.current[calendarMonth] = {
+          summary: freshSummary,
+          categoriesData: freshCat,
+          recentTransactions: freshTx,
+          calendarData: freshCal,
+        };
       } catch (err) {
         console.error('Error loading dashboard:', err);
       } finally {
@@ -476,6 +505,7 @@ export default function Dashboard() {
             {calendarData?.days.map((day) => {
               const exp = day.totalExpense;
               const intensity = exp > 0 ? Math.min(1, exp / (maxDailyExpense || 1)) : 0;
+              const hasBillReminder = day.transactions.some((t: any) => t.isBillReminder);
 
               let heatBg = 'bg-surface-variant/40 dark:bg-[#1f2937] text-outline';
               if (exp > 0) {
@@ -484,14 +514,23 @@ export default function Dashboard() {
                 else heatBg = 'bg-rose-100 dark:bg-rose-950/60 text-rose-900 dark:text-rose-200 font-bold';
               }
 
+              if (hasBillReminder && exp === 0) {
+                heatBg = 'bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 font-extrabold border border-amber-500/60';
+              }
+
               return (
                 <button
                   key={`heat-${day.date}`}
                   onClick={() => setSelectedDay(day)}
-                  className={`h-9 rounded-lg flex items-center justify-center text-xs transition-all hover:scale-105 active:scale-95 ${heatBg}`}
-                  title={`${day.dayNumber}: ${exp > 0 ? formatBRL(exp) : 'Sem gastos'}`}
+                  className={`h-9 rounded-lg flex items-center justify-center text-xs transition-all hover:scale-105 active:scale-95 relative ${heatBg} ${
+                    hasBillReminder ? 'ring-2 ring-amber-500 shadow-xs' : ''
+                  }`}
+                  title={`${day.dayNumber}: ${exp > 0 ? formatBRL(exp) : 'Lembrete de Conta'}`}
                 >
                   {day.dayNumber}
+                  {hasBillReminder && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 absolute top-1 right-1 animate-pulse" />
+                  )}
                 </button>
               );
             })}

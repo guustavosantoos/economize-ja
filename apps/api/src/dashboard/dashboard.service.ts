@@ -208,8 +208,54 @@ export class DashboardService {
           amount: amt,
           type: t.type,
           paymentMethod: t.paymentMethod,
-          category: t.category ? { name: t.category.name, icon: t.category.icon, color: t.category.color } : null,
         });
+      }
+    });
+
+    // Buscar contas/lembretes ativos do usuário e incluir no calendário
+    const bills = await this.prisma.bill.findMany({
+      where: { userId, isActive: true },
+      include: { category: true },
+    });
+
+    const targetYearMonth = `${year}-${String(month + 1).padStart(2, '0')}`;
+
+    bills.forEach((bill) => {
+      const dueDateStr = bill.nextDueDate.toISOString().split('T')[0];
+      const billStartMonth = dueDateStr.slice(0, 7);
+      const billDayNum = parseInt(dueDateStr.split('-')[2], 10);
+      let matchesMonth = false;
+
+      if (bill.recurrence === 'monthly') {
+        matchesMonth = targetYearMonth >= billStartMonth;
+      } else if (bill.recurrence === 'yearly') {
+        const billMonth = dueDateStr.slice(5, 7);
+        const currentMonthStr = String(month + 1).padStart(2, '0');
+        matchesMonth = targetYearMonth >= billStartMonth && billMonth === currentMonthStr;
+      } else {
+        matchesMonth = billStartMonth === targetYearMonth;
+      }
+
+      if (matchesMonth) {
+        // Usa o dia da data de vencimento (billDayNum) se dueDay for divergente
+        const actualDueDay = billDayNum || bill.dueDay || 10;
+        const targetDay = Math.min(actualDueDay, totalDaysInMonth);
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(targetDay).padStart(2, '0')}`;
+
+        if (daysMap[dateStr]) {
+          const amt = Number(bill.amount);
+          daysMap[dateStr].totalExpense += amt;
+
+          daysMap[dateStr].transactions.push({
+            id: `bill-${bill.id}`,
+            description: `[Lembrete] ${bill.name}`,
+            amount: amt,
+            type: 'expense',
+            paymentMethod: 'bill',
+            category: bill.category ? { name: bill.category.name, icon: bill.category.icon, color: bill.category.color } : null,
+            isBillReminder: true,
+          });
+        }
       }
     });
 
