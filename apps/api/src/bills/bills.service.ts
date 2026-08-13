@@ -79,7 +79,15 @@ export class BillsService {
       },
     });
 
-    // 2. Incrementar próximo vencimento conforme a recorrência
+    // 2. Incrementar próximo vencimento conforme a recorrência ou inativar se 'once'
+    if (bill.recurrence === ('once' as any)) {
+      return this.prisma.bill.update({
+        where: { id },
+        data: { isActive: false },
+        include: { category: true },
+      });
+    }
+
     const nextDate = new Date(bill.nextDueDate);
     if (bill.recurrence === 'monthly') {
       nextDate.setMonth(nextDate.getMonth() + 1);
