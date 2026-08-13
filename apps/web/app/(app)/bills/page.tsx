@@ -179,12 +179,14 @@ export default function BillsPage() {
     const cleanAmount = parseFloat(amount.replace(/\./g, '').replace(',', '.'));
     if (!name.trim() || isNaN(cleanAmount) || cleanAmount <= 0) return;
 
+    const calculatedDueDay = nextDueDate ? parseInt(nextDueDate.split('-')[2], 10) : parseInt(dueDay, 10) || 10;
+
     setSaving(true);
     try {
       await apiClient.post('/bills', {
         name: name.trim(),
         amount: cleanAmount,
-        dueDay: parseInt(dueDay, 10) || 10,
+        dueDay: calculatedDueDay,
         recurrence,
         nextDueDate,
         categoryId: categoryId || undefined,

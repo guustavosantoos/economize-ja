@@ -221,13 +221,15 @@ export class DashboardService {
     const targetYearMonth = `${year}-${String(month + 1).padStart(2, '0')}`;
 
     bills.forEach((bill) => {
-      const billStartMonth = bill.nextDueDate.toISOString().split('T')[0].slice(0, 7);
+      const dueDateStr = bill.nextDueDate.toISOString().split('T')[0];
+      const billStartMonth = dueDateStr.slice(0, 7);
+      const billDayNum = parseInt(dueDateStr.split('-')[2], 10);
       let matchesMonth = false;
 
       if (bill.recurrence === 'monthly') {
         matchesMonth = targetYearMonth >= billStartMonth;
       } else if (bill.recurrence === 'yearly') {
-        const billMonth = bill.nextDueDate.toISOString().split('T')[0].slice(5, 7);
+        const billMonth = dueDateStr.slice(5, 7);
         const currentMonthStr = String(month + 1).padStart(2, '0');
         matchesMonth = targetYearMonth >= billStartMonth && billMonth === currentMonthStr;
       } else {
@@ -235,7 +237,9 @@ export class DashboardService {
       }
 
       if (matchesMonth) {
-        const targetDay = Math.min(bill.dueDay || 10, totalDaysInMonth);
+        // Usa o dia da data de vencimento (billDayNum) se dueDay for divergente
+        const actualDueDay = billDayNum || bill.dueDay || 10;
+        const targetDay = Math.min(actualDueDay, totalDaysInMonth);
         const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(targetDay).padStart(2, '0')}`;
 
         if (daysMap[dateStr]) {
