@@ -275,8 +275,14 @@ bot.on(message('text'), async (ctx) => {
       clearTimeout(pending.timeout);
       pendingTransactions.delete(chatId);
       try {
+        const isInstallment = pending.transaction.installmentsCount && pending.transaction.installmentsCount > 1;
+        const totalAmountPayload = isInstallment
+          ? Number((pending.transaction.amount * pending.transaction.installmentsCount).toFixed(2))
+          : pending.transaction.amount;
+
         const result = await api.createTransaction(chatId, {
           ...pending.transaction,
+          amount: totalAmountPayload,
           source: 'bot_free',
         });
         
