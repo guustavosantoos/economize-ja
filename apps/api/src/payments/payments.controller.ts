@@ -11,12 +11,18 @@ export class PaymentsController {
 
   @ApiBearerAuth('access-token')
   @Post('checkout-session')
-  @ApiOperation({ summary: 'Criar sessão de checkout do Stripe para assinatura PRO' })
+  @ApiOperation({ summary: 'Criar sessão de checkout do Stripe para assinatura PRO (suporta trialDays)' })
   createCheckoutSession(
     @CurrentUser() user: any,
     @Body('cycle') cycle: 'monthly' | 'quarterly' | 'annual',
+    @Body('trialDays') trialDays?: number,
   ) {
-    return this.paymentsService.createCheckoutSession(user.id, user.email, cycle || 'annual');
+    return this.paymentsService.createCheckoutSession(
+      user.id,
+      user.email,
+      cycle || 'monthly',
+      trialDays !== undefined ? Number(trialDays) : undefined,
+    );
   }
 
   @ApiBearerAuth('access-token')

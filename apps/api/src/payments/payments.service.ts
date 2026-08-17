@@ -22,29 +22,42 @@ export class PaymentsService {
     });
   }
 
-  async createCheckoutSession(userId: string, email: string, cycle: 'monthly' | 'quarterly' | 'annual') {
-    const priceId = this.priceIds[cycle] || this.priceIds.annual;
+  async createCheckoutSession(
+    userId: string,
+    email: string,
+    cycle: 'monthly' | 'quarterly' | 'annual' = 'monthly',
+    trialDays?: number,
+  ) {
+    const priceId = this.priceIds[cycle] || this.priceIds.monthly;
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://economize-ja-production.up.railway.app';
 
-    try {
-      const session = await this.stripe.checkout.sessions.create({
-        payment_method_types: ['card'],
-        mode: 'subscription',
-        customer_email: email,
-        line_items: [
-          {
-            price: priceId,
-            quantity: 1,
-          },
-        ],
-        metadata: {
-          userId,
-          cycle,
+    const sessionParams: Stripe.Checkout.SessionCreateParams = {
+      payment_method_types: ['card'],
+      mode: 'subscription',
+      customer_email: email,
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
         },
-        success_url: `${appUrl}/pro?success=true`,
-        cancel_url: `${appUrl}/pro?canceled=true`,
-      });
+      ],
+      metadata: {
+        userId,
+        cycle,
+        trialDays: trialDays ? String(trialDays) : '0',
+      },
+      success_url: `${appUrl}/pro?success=true`,
+      cancel_url: `${appUrl}/pro?canceled=true`,
+    };
 
+    if (trialDays && trialDays > 0) {
+      sessionParams.subscription_data = {
+        trial_period_days: trialDays,
+      };
+    }
+
+    try {
+      const session = await this.stripe.checkout.sessions.create(sessionParams);
       return { url: session.url };
     } catch (err: any) {
       this.logger.error('Erro ao criar Checkout Session no Stripe', err.stack);
@@ -94,15 +107,15 @@ export class PaymentsService {
     this.logger.log(`Stripe Event Recebido: ${event.type}`);
 
     switch (event.type) {
-      // 1. Checkout Concluído e Confirmado -> Liberar PRO
+      // 1. Checkout Concluído e Confirmado -> Liberar PRO (mesmo em modo de teste com R$ 0 no dia)
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
         const userId = session.metadata?.userId;
         const email = session.customer_email || session.customer_details?.email;
 
-        if (session.payment_status === 'paid') {
+        if (session.payment_status === 'paid' || session.payment_status === 'no_payment_required') {
           if (userId) {
-            this.logger.log(`[Webhook] Pagamento CONFIRMADO para userId: ${userId}. Ativando PRO!`);
+            this.logger.log(`[Webhook] Assinatura/Trial CONFIRMADO para userId: ${userId}. Ativando PRO!`);
             await this.prisma.user.update({
               where: { id: userId },
               data: { plan: 'pro' },
@@ -110,7 +123,7 @@ export class PaymentsService {
           } else if (email) {
             const user = await this.prisma.user.findFirst({ where: { email } });
             if (user) {
-              this.logger.log(`[Webhook] Pagamento CONFIRMADO para email: ${email}. Ativando PRO!`);
+              this.logger.log(`[Webhook] Assinatura/Trial CONFIRMADO para email: ${email}. Ativando PRO!`);
               await this.prisma.user.update({
                 where: { id: user.id },
                 data: { plan: 'pro' },
