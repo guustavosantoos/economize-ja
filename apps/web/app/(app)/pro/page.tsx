@@ -1,13 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '../../../stores/auth.store';
-
 import { apiClient } from '../../../lib/api-client';
 
-export default function ProPage() {
+function ProContent() {
   const { user } = useAuthStore();
+  const searchParams = useSearchParams();
+  const trialParam = searchParams.get('trial');
   const [cycle, setCycle] = useState<'monthly' | 'quarterly' | 'annual'>('annual');
   const [subscribing, setSubscribing] = useState(false);
 
@@ -20,10 +22,13 @@ export default function ProPage() {
   const currentPrice = priceData[cycle];
   const isPro = user?.plan === 'pro';
 
-  const handleSubscribe = async () => {
+  const handleSubscribe = async (customCycle?: 'monthly' | 'quarterly' | 'annual', trialDays?: number) => {
     setSubscribing(true);
     try {
-      const res: any = await apiClient.post('/payments/checkout-session', { cycle });
+      const res: any = await apiClient.post('/payments/checkout-session', {
+        cycle: customCycle || cycle,
+        trialDays,
+      });
       if (res?.url) {
         window.location.href = res.url;
       } else {
@@ -35,6 +40,12 @@ export default function ProPage() {
       setSubscribing(false);
     }
   };
+
+  useEffect(() => {
+    if (trialParam === '7' && user && user.plan !== 'pro' && !subscribing) {
+      handleSubscribe('monthly', 7);
+    }
+  }, [trialParam, user]);
 
   const handleOpenPortal = async () => {
     setSubscribing(true);
@@ -179,7 +190,7 @@ export default function ProPage() {
           ) : (
             <button
               data-cy="pro-upgrade-button"
-              onClick={handleSubscribe}
+              onClick={() => handleSubscribe()}
               disabled={subscribing}
               className="w-full text-center text-xs sm:text-sm font-black py-4 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.01] active:scale-95 disabled:opacity-50"
             >
@@ -194,5 +205,13 @@ export default function ProPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ProPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-sm text-slate-500">Carregando...</div>}>
+      <ProContent />
+    </Suspense>
   );
 }
