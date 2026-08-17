@@ -18,23 +18,27 @@ export default function LandingFaq() {
       {faqs.map((item, i) => (
         <div
           key={i}
-          className="rounded-2xl border bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 overflow-hidden transition-all shadow-xs"
+          className="rounded-2xl border overflow-hidden transition-all"
+          style={{ borderColor: '#E1E3E4', background: '#FFFFFF' }}
         >
           <button
-            className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors"
+            className="w-full flex items-center justify-between px-5 py-4 text-left"
             onClick={() => setOpen(open === i ? null : i)}
           >
-            <span className="text-sm font-bold text-slate-900 dark:text-white">{item.q}</span>
+            <span className="text-sm font-semibold" style={{ color: '#191C1D' }}>{item.q}</span>
             <span
-              className={`material-symbols-outlined text-xl flex-shrink-0 ml-3 transition-transform duration-200 text-emerald-600 dark:text-emerald-400 ${
-                open === i ? 'rotate-180' : 'rotate-0'
-              }`}
+              className="material-symbols-outlined text-xl flex-shrink-0 ml-3 transition-transform duration-200"
+              style={{
+                color: '#003535',
+                pointerEvents: 'none',
+                transform: open === i ? 'rotate(180deg)' : 'rotate(0deg)',
+              }}
             >
               expand_more
             </span>
           </button>
           {open === i && (
-            <div className="px-5 pb-4 text-sm leading-relaxed border-t border-slate-200 dark:border-slate-800 pt-3 text-slate-600 dark:text-slate-300 font-medium">
+            <div className="px-5 pb-4 text-sm leading-relaxed border-t border-slate-100 pt-3" style={{ color: '#404848' }}>
               {item.a}
             </div>
           )}
