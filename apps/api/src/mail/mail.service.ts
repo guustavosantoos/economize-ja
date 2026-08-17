@@ -90,7 +90,7 @@ export class MailService {
 
   async send7DaysTrialPromoEmail(toEmail: string, userName?: string, checkoutUrl?: string) {
     const subject = '🎁 {{ contact.FIRSTNAME | default: "Economizador" }}, você ganhou 7 dias grátis do Plano PRO!';
-    const targetUrl = checkoutUrl || 'https://economize-ja-production.up.railway.app/pro';
+    const targetUrl = checkoutUrl || 'https://economize-ja-production.up.railway.app/pro?trial=7';
     const name = userName ? userName.split(' ')[0] : '{{ contact.FIRSTNAME | default: "Economizador" }}';
 
     const html = `
