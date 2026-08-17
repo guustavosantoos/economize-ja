@@ -18,6 +18,12 @@
       "sourceType": "github",
       "skillPath": "skills/ultimate-design-system-master/SKILL.md",
       "computedHash": "149e392abcb2417de4a960e9b40bf56cbc7fefa406ee0fa7fe54273e870b59f0"
+    },
+    "web-perf": {
+      "source": "cloudflare/skills",
+      "sourceType": "github",
+      "skillPath": "skills/web-perf/SKILL.md",
+      "computedHash": "7ae53856c320574f7440f50aef7892f96837eec9fd49d329d049d432fb4b299a"
     }
   }
 }
