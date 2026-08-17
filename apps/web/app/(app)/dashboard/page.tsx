@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { apiClient } from '../../../lib/api-client';
 import TransactionItem from '../../../components/TransactionItem';
 import PwaInstallPrompt from '../../../components/PwaInstallPrompt';
+import PromoTrialModal from '../../../components/PromoTrialModal';
 import CategoryManagerModal from '../../../components/CategoryManagerModal';
 import { useThemeStore } from '../../../stores/theme.store';
 import { useAuthStore } from '../../../stores/auth.store';
@@ -762,6 +763,8 @@ export default function Dashboard() {
           });
         }}
       />
+      {/* Modal Promocional de 7 Dias Grátis do Plano PRO */}
+      <PromoTrialModal />
     </div>
   );
 }

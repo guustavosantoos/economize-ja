@@ -1,99 +1,24 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Resend } from 'resend';
 import axios from 'axios';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
 
-@Injectable()
-export class MailService {
-  private resend?: Resend;
+dotenv.config({ path: path.resolve(__dirname, '../apps/api/.env') });
 
-  constructor(private configService: ConfigService) {
-    const resendKey = this.configService.get('RESEND_API_KEY');
-    if (resendKey && resendKey !== 'mock' && resendKey !== 'change-me') {
-      this.resend = new Resend(resendKey);
-    }
+const BREVO_API_KEY = process.env.BREVO_API_KEY;
+const SENDER_EMAIL = process.env.MAIL_FROM_EMAIL || 'onboarding.economizeja@gmail.com';
+const SENDER_NAME = process.env.MAIL_FROM_NAME || 'Economize Já';
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://economize-ja-production.up.railway.app';
+
+async function sendPromoEmail(toEmail: string, userName?: string, customCheckoutUrl?: string) {
+  if (!BREVO_API_KEY) {
+    console.error('❌ Chave BREVO_API_KEY não configurada no .env!');
+    process.exit(1);
   }
 
-  async sendEmail(to: string, subject: string, html: string) {
-    if (this.configService.get('NODE_ENV') === 'test') return;
+  const name = userName ? userName.split(' ')[0] : toEmail.split('@')[0];
+  const targetUrl = customCheckoutUrl || `${APP_URL}/pro`;
 
-    console.log(`\n================ E-MAIL DISPARADO ================`);
-    console.log(`Para: ${to}`);
-    console.log(`Assunto: ${subject}`);
-    console.log(`==================================================\n`);
-
-    const brevoApiKey = this.configService.get('BREVO_API_KEY');
-    const senderEmail = this.configService.get('MAIL_FROM_EMAIL') || 'onboarding.economizeja@gmail.com';
-    const senderName = this.configService.get('MAIL_FROM_NAME') || 'Economize Já';
-
-    const formattedHtml = html.includes('<html') || html.includes('<div')
-      ? html
-      : `
-        <div style="font-family: system-ui, -apple-system, sans-serif; background-color: #f8fafc; padding: 24px; color: #0f172a;">
-          <div style="max-width: 480px; margin: 0 auto; background: #ffffff; padding: 32px; border-radius: 16px; border: 1px solid #e2e8f0; shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-            <div style="text-align: center; margin-bottom: 24px;">
-              <h1 style="color: #003535; font-size: 22px; font-weight: 800; margin: 0;">Economize Já</h1>
-              <p style="color: #64748b; font-size: 12px; margin-top: 4px;">Seu controle financeiro pessoal</p>
-            </div>
-            <div style="font-size: 14px; line-height: 1.6; color: #334155;">
-              ${html.replace(/\n/g, '<br/>')}
-            </div>
-            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
-            <p style="font-size: 11px; color: #94a3b8; margin: 0; text-align: center;">Este e-mail foi enviado automaticamente pelo Economize Já.</p>
-          </div>
-        </div>
-      `;
-
-    // 1. Brevo REST API
-    if (brevoApiKey) {
-      try {
-        const response = await axios.post(
-          'https://api.brevo.com/v3/smtp/email',
-          {
-            sender: { name: senderName, email: senderEmail },
-            to: [{ email: to }],
-            subject,
-            htmlContent: formattedHtml,
-          },
-          {
-            headers: {
-              'api-key': brevoApiKey.trim(),
-              'Content-Type': 'application/json',
-              Accept: 'application/json',
-            },
-          }
-        );
-        console.log(`[Brevo Success] E-mail enviado para ${to}! MessageId: ${response.data?.messageId || 'OK'}`);
-        return;
-      } catch (err: any) {
-        console.error('[Brevo Error Status]:', err?.response?.status);
-        console.error('[Brevo Error Data]:', JSON.stringify(err?.response?.data || err.message));
-      }
-    }
-
-    // 2. Resend API Fallback
-    if (this.resend) {
-      const fromAddress = this.configService.get('MAIL_FROM') || 'Economize Já <onboarding@resend.dev>';
-      try {
-        await this.resend.emails.send({
-          from: fromAddress,
-          to,
-          subject,
-          html: formattedHtml,
-        });
-        console.log(`[Resend Success] E-mail enviado para ${to}!`);
-      } catch (e) {
-        console.error('Falha ao enviar e-mail via Resend:', e);
-      }
-    }
-  }
-
-  async send7DaysTrialPromoEmail(toEmail: string, userName?: string, checkoutUrl?: string) {
-    const subject = '🎁 Você ganhou 7 Dias Grátis do Plano PRO no Economize Já!';
-    const targetUrl = checkoutUrl || 'https://economize-ja-production.up.railway.app/pro';
-    const name = userName ? userName.split(' ')[0] : toEmail.split('@')[0];
-
-    const html = `
+  const htmlContent = `
 <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0b0f17; padding: 40px 16px; color: #f8fafc;">
   <div style="max-width: 560px; margin: 0 auto; background: #111827; border-radius: 24px; border: 1px solid #1e293b; padding: 36px 32px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);">
     
@@ -186,40 +111,31 @@ export class MailService {
     </p>
   </div>
 </div>
-    `;
+  `;
 
-    return this.sendEmail(toEmail, subject, html);
-  }
-
-  async syncContactToBrevo(email: string, name?: string) {
-    const brevoApiKey = this.configService.get('BREVO_API_KEY');
-    if (!brevoApiKey) return;
-
-    try {
-      const firstName = name ? name.split(' ')[0] : email.split('@')[0];
-      const lastName = name && name.split(' ').length > 1 ? name.split(' ').slice(1).join(' ') : '';
-
-      await axios.post(
-        'https://api.brevo.com/v3/contacts',
-        {
-          email,
-          attributes: {
-            FIRSTNAME: firstName,
-            LASTNAME: lastName,
-          },
-          updateEnabled: true,
+  try {
+    const response = await axios.post(
+      'https://api.brevo.com/v3/smtp/email',
+      {
+        sender: { name: SENDER_NAME, email: SENDER_EMAIL },
+        to: [{ email: toEmail }],
+        subject: '🎁 Você ganhou 7 Dias Grátis do Plano PRO no Economize Já!',
+        htmlContent,
+      },
+      {
+        headers: {
+          'api-key': BREVO_API_KEY.trim(),
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
         },
-        {
-          headers: {
-            'api-key': brevoApiKey.trim(),
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-        }
-      );
-      console.log(`[Brevo Contact Sync] Contato ${email} sincronizado no Brevo com sucesso!`);
-    } catch (err: any) {
-      console.error('[Brevo Contact Sync Error]:', err?.response?.data || err.message);
-    }
+      }
+    );
+    console.log(`✅ [Brevo Promo Email Sent] E-mail promocional enviado para: ${toEmail} | MessageId: ${response.data?.messageId}`);
+  } catch (err: any) {
+    console.error('❌ Error sending email via Brevo:', err?.response?.data || err.message);
   }
 }
+
+const targetEmail = process.argv[2] || 'guuh.santos153@gmail.com';
+console.log(`🚀 Disparando e-mail de promoção de 7 dias grátis para: ${targetEmail}...`);
+sendPromoEmail(targetEmail);
