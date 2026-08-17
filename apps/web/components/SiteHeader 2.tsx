@@ -14,11 +14,11 @@ export default function SiteHeader() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md transition-colors">
+    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur-md transition-colors">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16 gap-3">
         {/* Logo */}
-        <a href="#topo" className="flex items-center gap-2.5 font-black text-base sm:text-lg text-slate-900 dark:text-white transition-opacity hover:opacity-90">
-          <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center p-0.5 shadow-xs overflow-hidden">
+        <a href="#topo" className="flex items-center gap-2.5 font-black text-base sm:text-lg text-slate-900 transition-opacity hover:opacity-90">
+          <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center p-0.5 shadow-xs overflow-hidden">
             <Image
               src="/logo.png"
               alt="Economize Já Logo"
@@ -28,8 +28,8 @@ export default function SiteHeader() {
               className="object-contain w-full h-full"
             />
           </div>
-          <span className="tracking-tight font-extrabold text-slate-900 dark:text-white">
-            Economize <span className="text-emerald-600 dark:text-emerald-400 font-extrabold">Já</span>
+          <span className="tracking-tight font-extrabold text-slate-900">
+            Economize <span className="text-emerald-600 font-extrabold">Já</span>
           </span>
         </a>
 
@@ -39,7 +39,7 @@ export default function SiteHeader() {
             <a
               key={l.href}
               href={l.href}
-              className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+              className="text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-emerald-600 transition-colors"
             >
               {l.label}
             </a>
@@ -50,7 +50,7 @@ export default function SiteHeader() {
         <div className="flex items-center gap-2.5">
           <Link
             href="/login"
-            className="hidden sm:inline-flex text-xs font-bold px-3.5 py-2 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="hidden sm:inline-flex text-xs font-bold px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors"
           >
             Entrar
           </Link>
@@ -73,7 +73,7 @@ export default function SiteHeader() {
           {/* Hamburger toggle */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="md:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors"
             aria-label="Abrir menu"
           >
             <span className="material-symbols-outlined text-xl">
@@ -85,13 +85,13 @@ export default function SiteHeader() {
 
       {/* Mobile nav overlay */}
       {menuOpen && (
-        <div className="md:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-4 flex flex-col gap-3 shadow-lg">
+        <div className="md:hidden border-t border-slate-200 bg-white px-4 py-4 flex flex-col gap-3 shadow-lg">
           {navLinks.map((l) => (
             <a
               key={l.href}
               href={l.href}
               onClick={() => setMenuOpen(false)}
-              className="text-sm font-bold text-slate-700 dark:text-slate-200 py-2 border-b border-slate-100 dark:border-slate-800"
+              className="text-sm font-bold text-slate-700 py-2 border-b border-slate-100"
             >
               {l.label}
             </a>
@@ -99,7 +99,7 @@ export default function SiteHeader() {
           <div className="flex flex-col gap-2 pt-2">
             <Link
               href="/login"
-              className="w-full text-center text-xs font-bold py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200"
+              className="w-full text-center text-xs font-bold py-2.5 rounded-xl border border-slate-200 text-slate-700"
             >
               Entrar na conta
             </Link>

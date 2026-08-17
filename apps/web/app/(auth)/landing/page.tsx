@@ -41,36 +41,23 @@ function Hero() {
   return (
     <section
       id="topo"
-      className="relative overflow-hidden"
-      style={{
-        background: '#F8F9FA',
-        backgroundImage:
-          'radial-gradient(900px 500px at 85% -10%, #DCF3F2, transparent 60%), radial-gradient(700px 400px at 0% 10%, rgba(108,248,187,0.14), transparent 55%)',
-      }}
+      className="relative overflow-hidden bg-slate-50 dark:bg-[#0b0f17] transition-colors"
     >
       <div className="max-w-6xl mx-auto px-5 py-16 md:py-24 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
         {/* Copy */}
         <div className="flex flex-col gap-6">
           {/* Badge */}
-          <span
-            className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full self-start"
-            style={{ background: '#E3F7EE', color: '#006C49' }}
-          >
-            <span className="material-symbols-outlined text-base" style={{ pointerEvents: 'none', fontSize: '16px' }}>
-              chat_bubble
-            </span>
+          <span className="inline-flex items-center gap-2 text-xs font-bold px-3.5 py-1.5 rounded-full self-start bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/50">
+            <span className="material-symbols-outlined text-base">chat_bubble</span>
             Novo: lance gastos direto no Telegram
           </span>
 
-          <h1
-            className="text-4xl md:text-5xl font-bold leading-tight tracking-tight"
-            style={{ color: '#003535', textWrap: 'balance' } as any}
-          >
+          <h1 className="text-4xl md:text-5xl font-black leading-tight tracking-tight text-slate-900 dark:text-white">
             Assuma o controle do seu dinheiro{' '}
-            <span style={{ color: '#006C49' }}>sem planilhas</span>
+            <span className="text-emerald-600 dark:text-emerald-400">sem planilhas</span>
           </h1>
 
-          <p className="text-lg leading-relaxed max-w-lg" style={{ color: '#404848' }}>
+          <p className="text-base md:text-lg leading-relaxed max-w-lg text-slate-600 dark:text-slate-300">
             O Economize Já organiza suas despesas e receitas em segundos. Veja para onde vai cada real, acompanhe seu
             saldo em tempo real e registre gastos por mensagem — de qualquer lugar, pelo celular.
           </p>
@@ -79,28 +66,24 @@ function Hero() {
           <div className="flex flex-wrap gap-3">
             <Link
               href="/register"
-              className="inline-flex items-center gap-2 text-sm font-semibold px-6 py-3 rounded-xl text-white transition-all hover:opacity-90 active:scale-95 shadow-md"
-              style={{ background: '#003535' }}
+              className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold px-6 py-3.5 rounded-xl text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-600/20 transition-all hover:scale-[1.02] active:scale-95"
             >
               Criar minha conta grátis
-              <span className="material-symbols-outlined text-lg" style={{ pointerEvents: 'none', fontSize: '18px' }}>
-                arrow_forward
-              </span>
+              <span className="material-symbols-outlined text-lg">arrow_forward</span>
             </Link>
             <Link
               href="/login"
-              className="inline-flex items-center gap-2 text-sm font-semibold px-6 py-3 rounded-xl border-2 transition-all hover:bg-surface-container active:scale-95"
-              style={{ borderColor: '#003535', color: '#003535' }}
+              className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold px-6 py-3.5 rounded-xl border-2 border-slate-900 dark:border-slate-700 text-slate-900 dark:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-all active:scale-95"
             >
               Já tenho conta
             </Link>
           </div>
 
           {/* Reassurances */}
-          <div className="flex flex-wrap gap-5 text-xs" style={{ color: '#707978' }}>
+          <div className="flex flex-wrap gap-5 text-xs text-slate-600 dark:text-slate-400 font-semibold">
             {['Grátis para começar', 'Sem cartão de crédito', 'Pronto em 2 minutos'].map((r) => (
               <span key={r} className="flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-sm" style={{ color: '#006C49', pointerEvents: 'none', fontSize: '16px' }}>
+                <span className="material-symbols-outlined text-sm text-emerald-600 dark:text-emerald-400">
                   check_circle
                 </span>
                 {r}
@@ -111,55 +94,44 @@ function Hero() {
 
         {/* Visual — App mockup */}
         <div className="relative flex justify-center items-center">
-          <div
-            className="w-full max-w-xs rounded-3xl p-1 shadow-2xl"
-            style={{ background: 'linear-gradient(145deg, #003535, #0D4D4D)' }}
-          >
-            <div className="bg-white rounded-[22px] overflow-hidden">
+          <div className="w-full max-w-xs rounded-3xl p-1.5 shadow-2xl bg-gradient-to-br from-emerald-700 via-slate-900 to-slate-950 border border-slate-800">
+            <div className="bg-slate-900 rounded-[22px] overflow-hidden shadow-2xl border border-slate-800">
               {/* Status bar */}
-              <div className="h-8 flex items-center justify-center" style={{ background: '#003535' }}>
-                <span className="text-white text-xs font-medium opacity-80">Economize Já</span>
+              <div className="h-8 flex items-center justify-center bg-[#003535]">
+                <span className="text-white text-xs font-extrabold tracking-wide">Economize Já</span>
               </div>
               {/* Balance card */}
-              <div className="p-4" style={{ background: '#003535' }}>
-                <p className="text-xs opacity-70 text-white mb-1 uppercase tracking-wider">Saldo Atual</p>
-                <p className="text-3xl font-bold text-white">R$ 1.847,32</p>
-                <span
-                  className="text-xs font-semibold mt-2 inline-block px-2.5 py-1 rounded-full"
-                  style={{ background: '#6CF8BB', color: '#00714D' }}
-                >
+              <div className="p-4 bg-[#003535] text-white">
+                <p className="text-[10px] text-emerald-300 font-bold uppercase tracking-wider mb-1">Saldo Atual</p>
+                <p className="text-3xl font-black text-white">R$ 1.847,32</p>
+                <span className="text-xs font-extrabold mt-2 inline-block px-2.5 py-0.5 rounded-full bg-emerald-400 text-slate-950">
                   +12,4% este mês
                 </span>
               </div>
               {/* Stats */}
-              <div className="grid grid-cols-2 gap-3 p-4" style={{ background: '#F3F4F5' }}>
-                <div className="bg-white p-3 rounded-xl border" style={{ borderColor: '#E1E3E4' }}>
-                  <p className="text-xs" style={{ color: '#707978' }}>Receitas</p>
-                  <p className="text-base font-bold" style={{ color: '#006C49' }}>R$ 5.200</p>
+              <div className="grid grid-cols-2 gap-3 p-3 bg-slate-950">
+                <div className="bg-slate-900 p-3 rounded-xl border border-slate-800">
+                  <p className="text-[10px] text-slate-400 font-bold">Receitas</p>
+                  <p className="text-sm font-extrabold text-emerald-400">R$ 5.200</p>
                 </div>
-                <div className="bg-white p-3 rounded-xl border" style={{ borderColor: '#E1E3E4' }}>
-                  <p className="text-xs" style={{ color: '#707978' }}>Despesas</p>
-                  <p className="text-base font-bold" style={{ color: '#BA1A1A' }}>R$ 3.352</p>
+                <div className="bg-slate-900 p-3 rounded-xl border border-slate-800">
+                  <p className="text-[10px] text-slate-400 font-bold">Despesas</p>
+                  <p className="text-sm font-extrabold text-rose-400">R$ 3.352</p>
                 </div>
               </div>
               {/* Transactions */}
-              <div className="px-4 pb-4 space-y-2">
+              <div className="px-3 pb-4 space-y-2 bg-slate-950">
                 {[
-                  { icon: 'directions_car', name: 'Uber', val: '-R$ 55,00', col: '#BA1A1A' },
-                  { icon: 'restaurant', name: 'Almoço', val: '-R$ 32,00', col: '#BA1A1A' },
-                  { icon: 'payments', name: 'Salário', val: '+R$ 5.200', col: '#006C49' },
+                  { icon: 'directions_car', name: 'Uber', val: '-R$ 55,00', col: 'text-rose-400' },
+                  { icon: 'restaurant', name: 'Almoço', val: '-R$ 32,00', col: 'text-rose-400' },
+                  { icon: 'payments', name: 'Salário', val: '+R$ 5.200', col: 'text-emerald-400' },
                 ].map((t) => (
-                  <div key={t.name} className="flex items-center gap-3 bg-white p-3 rounded-xl border" style={{ borderColor: '#E1E3E4' }}>
-                    <div
-                      className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                      style={{ background: '#B4EDEC' }}
-                    >
-                      <span className="material-symbols-outlined text-sm" style={{ color: '#003535', pointerEvents: 'none', fontSize: '16px' }}>
-                        {t.icon}
-                      </span>
+                  <div key={t.name} className="flex items-center gap-3 bg-slate-900 p-2.5 rounded-xl border border-slate-800">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center flex-shrink-0 text-emerald-400">
+                      <span className="material-symbols-outlined text-base">{t.icon}</span>
                     </div>
-                    <span className="text-sm font-medium flex-1" style={{ color: '#191C1D' }}>{t.name}</span>
-                    <span className="text-sm font-bold" style={{ color: t.col }}>{t.val}</span>
+                    <span className="text-xs font-bold text-white flex-1">{t.name}</span>
+                    <span className={`text-xs font-black ${t.col}`}>{t.val}</span>
                   </div>
                 ))}
               </div>
@@ -167,21 +139,13 @@ function Hero() {
           </div>
 
           {/* Float card */}
-          <div
-            className="absolute bottom-6 -left-4 hidden sm:flex items-center gap-3 rounded-2xl px-4 py-3 shadow-xl"
-            style={{ background: '#FFFFFF', boxShadow: '0 12px 32px rgba(0,53,53,0.16)', maxWidth: '200px' }}
-          >
-            <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: '#B4EDEC' }}
-            >
-              <span className="material-symbols-outlined text-base" style={{ color: '#003535', pointerEvents: 'none', fontSize: '18px' }}>
-                chat_bubble
-              </span>
+          <div className="absolute bottom-6 -left-4 hidden sm:flex items-center gap-3 rounded-2xl px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl max-w-[210px]">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
+              <span className="material-symbols-outlined text-lg">chat_bubble</span>
             </div>
             <div className="leading-tight">
-              <p className="text-xs font-semibold" style={{ color: '#191C1D' }}>"gasto uber 55"</p>
-              <p className="text-[10px]" style={{ color: '#707978' }}>registrado em 1 segundo</p>
+              <p className="text-xs font-bold text-slate-900 dark:text-white">"gasto uber 55"</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400">registrado em 1 segundo</p>
             </div>
           </div>
         </div>
@@ -227,7 +191,7 @@ const features = [
 
 function Features() {
   return (
-    <section id="recursos" className="py-20 bg-white">
+    <section id="recursos" className="py-20 bg-white dark:bg-[#111827] transition-colors">
       <div className="max-w-6xl mx-auto px-5 flex flex-col gap-12">
         <SectionHeading
           eyebrow="Tudo em um só lugar"
@@ -238,32 +202,19 @@ function Features() {
           {features.map((f) => (
             <article
               key={f.title}
-              className="flex flex-col gap-3 p-6 rounded-2xl border transition-all duration-200 hover:-translate-y-1"
-              style={{
-                background: '#F8F9FA',
-                borderColor: '#E1E3E4',
-                boxShadow: '0 4px 12px rgba(13,77,77,0.05)',
-              }}
+              className="flex flex-col gap-3 p-6 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 transition-all duration-200 hover:-translate-y-1 shadow-xs"
             >
-              <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ background: '#B4EDEC' }}
-              >
-                <span className="material-symbols-outlined" style={{ color: '#003535', pointerEvents: 'none' }}>
-                  {f.icon}
-                </span>
+              <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 flex items-center justify-center border border-emerald-200 dark:border-emerald-800/40">
+                <span className="material-symbols-outlined text-2xl">{f.icon}</span>
               </div>
-              <h3 className="text-base font-semibold" style={{ color: '#191C1D' }}>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
                 {f.title}
               </h3>
-              <p className="text-sm leading-relaxed" style={{ color: '#404848' }}>
+              <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
                 {f.text}
               </p>
               {f.soon && (
-                <span
-                  className="self-start text-xs font-semibold px-3 py-1 rounded-full"
-                  style={{ background: '#E3F7EE', color: '#006C49' }}
-                >
+                <span className="self-start text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
                   Em breve
                 </span>
               )}
@@ -278,11 +229,7 @@ function Features() {
 /* ─── Telegram Section ─── */
 function TelegramSection() {
   return (
-    <section
-      id="telegram"
-      className="py-20"
-      style={{ background: '#F8F9FA' }}
-    >
+    <section id="telegram" className="py-20 bg-slate-50 dark:bg-[#0b0f17] transition-colors">
       <div className="max-w-6xl mx-auto px-5 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
         {/* Telegram mockup */}
         <div className="flex justify-center order-2 md:order-1">
@@ -302,23 +249,22 @@ function TelegramSection() {
               '"receita salário 5200" → receita salva',
               '"saldo" → veja seu saldo atual',
             ].map((item) => (
-              <li key={item} className="flex items-start gap-3 text-sm" style={{ color: '#404848' }}>
-                <span className="material-symbols-outlined text-lg flex-shrink-0 mt-0.5" style={{ color: '#006C49', pointerEvents: 'none' }}>
+              <li key={item} className="flex items-start gap-3 text-sm text-slate-700 dark:text-slate-300 font-medium">
+                <span className="material-symbols-outlined text-lg flex-shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400">
                   check_circle
                 </span>
-                <code className="text-sm bg-white px-2 py-0.5 rounded border border-zinc-200" style={{ color: '#003535' }}>{item}</code>
+                <code className="text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-emerald-300 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800 font-bold">
+                  {item}
+                </code>
               </li>
             ))}
           </ul>
           <Link
             href="/register"
-            className="inline-flex items-center gap-2 text-sm font-semibold px-6 py-3 rounded-xl text-white self-start transition-all hover:opacity-90 active:scale-95 shadow-md"
-            style={{ background: '#003535' }}
+            className="inline-flex items-center gap-2 text-sm font-bold px-6 py-3.5 rounded-xl text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-600/20 self-start transition-all hover:scale-[1.02] active:scale-95"
           >
             Conectar meu Telegram
-            <span className="material-symbols-outlined text-lg" style={{ pointerEvents: 'none', fontSize: '18px' }}>
-              arrow_forward
-            </span>
+            <span className="material-symbols-outlined text-lg">arrow_forward</span>
           </Link>
         </div>
       </div>
@@ -335,7 +281,7 @@ const steps = [
 
 function HowItWorks() {
   return (
-    <section id="como-funciona" className="py-20 bg-white">
+    <section id="como-funciona" className="py-20 bg-white dark:bg-[#111827] transition-colors">
       <div className="max-w-6xl mx-auto px-5 flex flex-col items-center gap-12">
         <SectionHeading
           eyebrow="Simples do início ao fim"
@@ -344,15 +290,12 @@ function HowItWorks() {
         />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
           {steps.map((s) => (
-            <div key={s.num} className="flex flex-col gap-4">
-              <div
-                className="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-lg"
-                style={{ background: 'linear-gradient(140deg, #003535, #0D4D4D)' }}
-              >
+            <div key={s.num} className="flex flex-col gap-4 bg-slate-50 dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
+              <div className="w-11 h-11 rounded-xl bg-emerald-600 text-white font-extrabold text-lg flex items-center justify-center shadow-md shadow-emerald-600/20">
                 {s.num}
               </div>
-              <h3 className="text-base font-semibold" style={{ color: '#191C1D' }}>{s.title}</h3>
-              <p className="text-sm leading-relaxed" style={{ color: '#404848' }}>{s.text}</p>
+              <h3 className="text-base font-extrabold text-slate-900 dark:text-white">{s.title}</h3>
+              <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300 font-medium">{s.text}</p>
             </div>
           ))}
         </div>
