@@ -77,6 +77,7 @@ function NewTransactionForm() {
   const [newCatColor, setNewCatColor] = useState('#3b82f6');
   const [creatingCategory, setCreatingCategory] = useState(false);
   const [catError, setCatError] = useState('');
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
 
   useEffect(() => {
     if (paramDate) {
@@ -284,22 +285,64 @@ function NewTransactionForm() {
               </button>
             </div>
             <div className="relative">
-              <select
+              {/* Trigger Button */}
+              <button
                 data-cy="add-transaction-category-select"
-                value={categoryId}
-                onChange={(e) => setCategoryId(e.target.value)}
-                className="w-full p-4 rounded-2xl border border-surface-variant dark:border-[#253346] bg-surface dark:bg-[#1e2836] text-on-surface font-semibold text-sm focus:outline-none focus:border-primary appearance-none pr-10"
+                type="button"
+                onClick={() => setShowCategoryDropdown((v) => !v)}
+                className="w-full p-4 rounded-2xl border border-surface-variant dark:border-[#253346] bg-surface dark:bg-[#1e2836] text-on-surface font-semibold text-sm focus:outline-none focus:border-primary flex items-center justify-between text-left"
               >
-                <option value="">Selecione uma categoria...</option>
-                {filteredCategories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
-              <span className="material-symbols-outlined absolute right-3.5 top-4 pointer-events-none text-outline">
-                keyboard_arrow_down
-              </span>
+                <span className={categoryId ? 'text-on-surface' : 'text-outline'}>
+                  {categoryId
+                    ? filteredCategories.find((c) => c.id === categoryId)?.name || 'Selecione uma categoria...'
+                    : 'Selecione uma categoria...'}
+                </span>
+                <span
+                  className="material-symbols-outlined text-outline transition-transform duration-200"
+                  style={{ transform: showCategoryDropdown ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                >
+                  keyboard_arrow_down
+                </span>
+              </button>
+
+              {/* Custom Dropdown List */}
+              {showCategoryDropdown && (
+                <>
+                  {/* Backdrop to close */}
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setShowCategoryDropdown(false)}
+                  />
+                  <div className="absolute left-0 right-0 top-full mt-1 z-20 bg-white dark:bg-[#1e2836] border border-surface-variant dark:border-[#253346] rounded-2xl shadow-2xl overflow-hidden">
+                    {filteredCategories.length === 0 && (
+                      <p className="px-4 py-3 text-sm text-outline text-center">Nenhuma categoria encontrada</p>
+                    )}
+                    {filteredCategories.map((cat) => (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => {
+                          setCategoryId(cat.id);
+                          setShowCategoryDropdown(false);
+                        }}
+                        className={`w-full px-4 py-3 text-left text-sm font-semibold flex items-center gap-3 transition-colors ${
+                          categoryId === cat.id
+                            ? 'bg-primary/10 dark:bg-[#2dd4bf]/10 text-primary dark:text-[#2dd4bf]'
+                            : 'text-on-surface hover:bg-surface-container dark:hover:bg-[#253346]'
+                        }`}
+                      >
+                        {cat.icon && (
+                          <span className="material-symbols-outlined text-lg flex-shrink-0">{cat.icon}</span>
+                        )}
+                        <span>{cat.name}</span>
+                        {categoryId === cat.id && (
+                          <span className="material-symbols-outlined text-base ml-auto">check</span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
